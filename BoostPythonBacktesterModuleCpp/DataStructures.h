@@ -6,6 +6,15 @@ enum class OrderType {
 	marketOrder, limitOrder
 };
 
+struct DECLSPEC Candel {
+	int open;
+	int high;
+	int low;
+	int close;
+	int volume;
+	boost::posix_time::ptime datetime;
+};
+
 struct DECLSPEC Order {
 	static Order Make_Limit_Order(std::string trader_identifier, std::string ticker, int volume, int price);
 	
@@ -17,8 +26,12 @@ struct DECLSPEC Order {
 	int price;
 	OrderType orderType;
 
-	std::string* trader_identifier;
-	std::string* ticker;
+	std::string trader_identifier;
+	std::string ticker;
+
+	bool isHistory = false;  //Should be set true for orders created from history data 
+
+	const std::string getTicker();
 
 	Order();
 	Order(const Order &order);
@@ -38,8 +51,8 @@ struct DECLSPEC Match {
 
 	friend DECLSPEC bool operator==(const Match& rhs, const Match& lhs);
 
-	std::string* ticker;
-	std::string* trader_identifier;
+	std::string ticker;
+	std::string trader_identifier;
 
 	Match& operator=(const Match&);
 
@@ -47,4 +60,6 @@ struct DECLSPEC Match {
 	Match();
 	~Match();
 };
+
+
 typedef std::unordered_map<int, std::list<Order>> MarketDepthData;

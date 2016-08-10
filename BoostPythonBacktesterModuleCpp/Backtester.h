@@ -12,5 +12,12 @@
 #include <ostream>
 #include <algorithm>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include "DataStructures.h"
 #include "MarketDepth.h"
+
+#include "Trader.h"
+#include "Market.h"
+
+#include "OrdersFromCandelBuilder.h"

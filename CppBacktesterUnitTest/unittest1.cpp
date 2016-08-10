@@ -72,7 +72,7 @@ namespace CppBacktesterUnitTest {
 				{ 11 , { o_sell, o_sell } } 
 			};
 
-			Assert::AreEqual(expectedDepth, (*m.getInternalDepth()));
+			Assert::AreEqual(expectedDepth, m.getInternalDepth());
 
 
 		}	
@@ -94,7 +94,7 @@ namespace CppBacktesterUnitTest {
 				{ 11 ,{ o_sell2,  o_sell, o_sell } }
 			};
 
-			Assert::AreEqual(expectedDepth, (*m.getInternalDepth()));
+			Assert::AreEqual(expectedDepth, m.getInternalDepth());
 		}
 
 		TEST_METHOD(MatchingOrders_Partial) {
@@ -115,7 +115,7 @@ namespace CppBacktesterUnitTest {
 				{ 10 ,{ Order::Make_Limit_Order("Max", "stock", 5, 10) } },
 				{ 11 ,{ Order::Make_Limit_Order("Max", "stock", -5, 11) } }
 			};
-			Assert::AreEqual(expectedDepth, (*m.getInternalDepth()));
+			Assert::AreEqual(expectedDepth, m.getInternalDepth());
 		}
 
 
@@ -142,7 +142,7 @@ namespace CppBacktesterUnitTest {
 			MarketDepthData expectedDepth{
 				
 			};
-			Assert::AreEqual(expectedDepth, (*m.getInternalDepth()));
+			Assert::AreEqual(expectedDepth, m.getInternalDepth());
 		}
 
 
@@ -158,7 +158,7 @@ namespace CppBacktesterUnitTest {
 			MarketDepthData expectedDepth{
 				{ 12 ,{ Order::Make_Limit_Order("Max", "stock", 10, 12)} }
 			};
-			Assert::AreEqual(expectedDepth, (*m.getInternalDepth()));
+			Assert::AreEqual(expectedDepth, m.getInternalDepth());
 		}
 
 		TEST_METHOD(MatchingOrders_OverSellOverBuy) {
@@ -173,7 +173,7 @@ namespace CppBacktesterUnitTest {
 			MarketDepthData expectedDepth{
 				{ 9 ,{ Order::Make_Limit_Order("Max", "stock", -10, 9) } }
 			};
-			Assert::AreEqual(expectedDepth, (*m.getInternalDepth()));
+			Assert::AreEqual(expectedDepth, m.getInternalDepth());
 		}
 	private:
 		MarketDepth marketDepth;

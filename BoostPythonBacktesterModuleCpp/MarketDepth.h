@@ -9,7 +9,7 @@ public:
 	void addOrder(Order o);
 	void removeOrder(int id);
 	AnonimousMaketDepth const * getAnonimousDepth(int depthLength);
-	MarketDepthData const * getInternalDepth();
+	MarketDepthData const & getInternalDepth();
 private:
 	std::vector<int> getUnsortedPrices();
 
@@ -22,5 +22,5 @@ private:
 	std::string* trader_identifier;
 	std::vector<Match>* currentMatches;
 	std::string* ticker;
-	MarketDepthData *  totalDepth;
+	MarketDepthData  totalDepth;
 };
