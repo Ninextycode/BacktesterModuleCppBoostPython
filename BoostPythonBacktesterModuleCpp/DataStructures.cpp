@@ -27,38 +27,9 @@ Order::Order(const Order & order) {
 }
 
 Order::~Order() {
-	//delete trader_identifier;
-	//delete ticker;
 }
 
 
-Match Match::Make_Match(std::string  trader_identifier,
-						std::string  ticker, int volume, int price) {
-	Match match;
-	match.volume = volume;
-	match.price = price;
-
-	match.ticker = std::string(ticker);
-
-	match.trader_identifier = std::string(trader_identifier);
-
-	return match;
-}
-
-Match::Match(const Match & match) {
-	this->price = match.price;
-	this->ticker = std::string(match.ticker);
-	this->trader_identifier = std::string(match.trader_identifier);
-	this->volume = match.volume;
-}
-
-Match::Match():ticker(), trader_identifier() {
-}
-
-Match::~Match() {
-	//delete this->trader_identifier;
-	//delete this->ticker;
-}
 
 bool operator==(const Order & lhs, const Order & rhs) {
 	return
@@ -114,4 +85,29 @@ Match & Match::operator=(const Match &other) {
 
 const std::string Order::getTicker() {
 	return ticker;
+}
+
+OrderChange OrderChange::MakeChangesByComparison (const Order & initial,
+												 const Order & after, ChangeReason reason) {
+	OrderChange change;
+
+	change.volumeChange = after.volume - initial.volume;
+	change.currentVolume = after.volume;
+	change.ticker = after.ticker;
+	change.trader_identifier = after.trader_identifier;
+	change.reason = reason;
+
+	return change;
+}
+
+OrderChange OrderChange::ChangesOfOrderVanishing (const Order & order, ChangeReason reason) {
+	OrderChange change;
+
+	change.volumeChange = -order.volume;
+	change.currentVolume = 0;
+	change.ticker = order.ticker;
+	change.trader_identifier = order.trader_identifier;
+	change.reason = reason;
+
+	return change;
 }

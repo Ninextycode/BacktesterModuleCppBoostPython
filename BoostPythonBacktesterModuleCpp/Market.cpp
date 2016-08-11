@@ -22,13 +22,43 @@ void SngleTraderMarket::runFullTest() {
 void SngleTraderMarket::addOrder(Order order) {
 }
 
-void SngleTraderMarket::cancelOrder(std::string trades_identifier, std::string ticker, int desiredVolume, int price) {
+void SngleTraderMarket::changeOrder(Order order) {
+	//depths[ticker].cancelOrder(trades_identifier, );
 }
 
 void SngleTraderMarket::tick() {
+	this->updateDepths();
+	this->addAndCleanOrders();
+	this->sendAndCleanTickData();
+	this->sendAndCleanCandles();
 }
 
-void SngleTraderMarket::send_data_to_traders(AnonimousMaketDepth & depth, std::vector<Match> matches) {
+void SngleTraderMarket::updateDepths() {
+	for (auto ticker : tickers) {
+		auto currentCandle = historyData[ticker][currentTick];
+		auto orders = OrdersFromCandelBuilder::ordersFromCandel(currentCandle, ticker);
+		for (Order order : orders) {
+			depths[ticker].addOrder(order);
+		}
+	}
+}
+
+void SngleTraderMarket::addAndCleanOrders() {
+	for (Order order : this->ordersToAdd) {
+		auto desiderDepth = this->depths.find(order.ticker);
+		desiderDepth->second.addOrder(order);		
+	}
+	ordersToAdd.clear();
+}
+
+void SngleTraderMarket::sendAndCleanTickData() {
+	this->trader->recieveTickData(matchesToSend, anonimousDepths);
+	matchesToSend.clear();
+}
+
+void SngleTraderMarket::sendAndCleanCandles() {
+	this->trader->recieveCandels(candelsToSend);
+	candelsToSend.clear();
 }
 
 void loadHistoryData(std::string path) {

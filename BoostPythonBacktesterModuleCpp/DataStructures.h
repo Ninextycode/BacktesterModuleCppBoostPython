@@ -39,27 +39,21 @@ struct DECLSPEC Order {
 	~Order();
 } ;
 
-
-struct DECLSPEC Match {
-
-	static Match Make_Match(std::string trader_identifier, std::string ticker,
-		int volume, int price);
-	int volume;
-	int price;
-
-	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream, const Match& p);
-
-	friend DECLSPEC bool operator==(const Match& rhs, const Match& lhs);
-
-	std::string ticker;
-	std::string trader_identifier;
-
-	Match& operator=(const Match&);
-
-	Match(const Match &match);
-	Match();
-	~Match();
+enum class ChangeReason {
+	Match, Cancellation, Unknown
 };
 
+struct DECLSPEC OrderChange {
+	static OrderChange MakeChangesByComparison(const Order& initial,
+											   const Order& after, ChangeReason reason);
+	static OrderChange ChangesOfOrderVanishing (const Order& order, ChangeReason reason);
+	
+	ChangeReason reason;
+	int volumeChange;
+	int price;
+	int currentVolume;
+	std::string ticker;
+	std::string trader_identifier;
+};
 
 typedef std::unordered_map<int, std::list<Order>> MarketDepthData;

@@ -6,8 +6,9 @@ public:
 	
 	~MarketDepth();
 
-	void addOrder(Order o);
-	void removeOrder(int id);
+	std::vector<OrderChange> addOrder(Order o);
+	/* removes all previous orders of current trader */
+	std::vector<OrderChange> changeOrder(Order order);
 	AnonimousMaketDepth const * getAnonimousDepth(int depthLength);
 	MarketDepthData const & getInternalDepth();
 private:
@@ -19,8 +20,8 @@ private:
 	void tryMatchOrderWithExactPriceOrders(Order *order,
 								int price);
 
-	std::string* trader_identifier;
-	std::vector<Match>* currentMatches;
+	void removeOrdersOfSuchTraderWithSuchPrice(Order order);
+	std::vector<OrderChange> currentChanges;
 	std::string* ticker;
 	MarketDepthData  totalDepth;
 };

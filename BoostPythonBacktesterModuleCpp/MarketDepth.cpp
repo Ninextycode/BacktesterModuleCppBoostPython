@@ -12,18 +12,18 @@ MarketDepth::~MarketDepth() {
 	delete this->ticker;
 }
 
-void MarketDepth::addOrder(Order order) {
-	this->currentMatches = new std::vector<Match>();
+std::vector<OrderChange> MarketDepth::addOrder(Order order) {
+	currentChanges.clear();
 	tryMatchOrder(&order);
 	if (order.volume != 0) {
-		auto it = this->totalDepth.find(order.price);
-		if (it == this->totalDepth.end()) {
+		auto it_whereOrdersWithSuchPrice = this->totalDepth.find(order.price);
+		if (it_whereOrdersWithSuchPrice == this->totalDepth.end()) {
 			(this->totalDepth)[order.price] = { order };
 		} else {
-			it->second.push_front(order);
+			it_whereOrdersWithSuchPrice->second.push_front(order);
 		}
 	}
-	delete this->currentMatches;
+	return currentChanges;
 }
 
 
@@ -72,28 +72,31 @@ std::vector<int> MarketDepth::getUnsortedPrices() {
 void MarketDepth::tryMatchOrderWithExactPriceOrders(Order* order, int price) {
 	auto &ordersList = (totalDepth)[price];
 	for (auto it = ordersList.begin(); it != ordersList.end(); /* "it" is incrementing */) {
-		if (abs(order->volume) >= abs(it->volume)) {
-			this->currentMatches->
-					push_back(Match::Make_Match(it->trader_identifier, 
-							  it->ticker, it->volume, price));
+		if (abs(order->volume) >= abs(it->volume)) { //Vanishing of order already being inside depth
 
-			this->currentMatches->
-				push_back(Match::Make_Match(order->trader_identifier,
-						  order->ticker, -it->volume, price));
-			
+			this->currentChanges.
+					push_back(OrderChange::ChangesOfOrderVanishing(*it, ChangeReason::Match));
+
+			Order oldOrder = *order;
 			order->volume += it->volume;
+
+			this->currentChanges.
+				push_back(OrderChange::MakeChangesByComparison(oldOrder, *order, ChangeReason::Match));
+			
+			
 			it = ordersList.erase(it); // <-- here incrementation
-		} else {
-			this->currentMatches->
-				push_back(Match::Make_Match(it->trader_identifier,
-						  it->ticker, -order->volume, price));
+		} else {  //Vanishing of newly recieved order
 
-			this->currentMatches->
-				push_back(Match::Make_Match(order->trader_identifier,
-						  order->ticker, order->volume, price));
-
+			this->currentChanges.
+				push_back(OrderChange::ChangesOfOrderVanishing(*order, ChangeReason::Match));
+			
+			Order oldOrder = *it;
 			it->volume += order->volume;
-			order->volume = 0;			
+			order->volume = 0;
+
+			this->currentChanges.
+				push_back(OrderChange::MakeChangesByComparison(oldOrder, *it, ChangeReason::Match));
+					
 			break;
 		}
 	}
@@ -102,8 +105,27 @@ void MarketDepth::tryMatchOrderWithExactPriceOrders(Order* order, int price) {
 	}
 }
 
-void MarketDepth::removeOrder(int id) {
-	//TODO
+
+std::vector<OrderChange>  MarketDepth::changeOrder(Order order) {
+	currentChanges.clear();
+	removeOrdersOfSuchTraderWithSuchPrice(order);
+	addOrder(order);
+	return currentChanges;
+}
+
+void MarketDepth::removeOrdersOfSuchTraderWithSuchPrice(Order newOrder) {
+	auto it_whereOrdersWithSuchPrice = this->totalDepth.find(newOrder.price);
+	if (it_whereOrdersWithSuchPrice != this->totalDepth.end()) {
+		std::list<Order>& ordersList = it_whereOrdersWithSuchPrice->second;
+		for (auto it = ordersList.begin(); it != ordersList.end(); ) {
+			if (it->trader_identifier == newOrder.trader_identifier) {
+				it = ordersList.erase(it);
+				// CRITICAL TODO ADD ORDER ANNCELLATION TRACK
+			} else {
+				it++;
+			}
+		}
+	}
 }
 
 AnonimousMaketDepth const *  MarketDepth::getAnonimousDepth(int depthLength) {
