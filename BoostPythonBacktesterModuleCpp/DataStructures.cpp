@@ -41,13 +41,15 @@ bool operator==(const Order & lhs, const Order & rhs) {
 		lhs.trader_identifier == rhs.trader_identifier;
 }
 
-bool operator==(const Match & lhs, const Match & rhs) {
+bool operator==(const OrderChange & lhs, const OrderChange & rhs) {
 	return
+		lhs.currentVolume == rhs.currentVolume &&
 		lhs.price == rhs.price &&
-		lhs.volume == rhs.volume &&
+		lhs.reason == rhs.reason &&
 
 		lhs.ticker == rhs.ticker &&
-		lhs.trader_identifier == rhs.trader_identifier;
+		lhs.trader_identifier == rhs.trader_identifier &&
+		lhs.volumeChange == rhs.volumeChange;
 }
 
 std::ostream &  operator<<(std::ostream & outputStream, const Order & p) {
@@ -55,10 +57,6 @@ std::ostream &  operator<<(std::ostream & outputStream, const Order & p) {
 	return outputStream;
 }
 
-std::ostream & operator<<(std::ostream & outputStream, const Match & p) {
-	outputStream << p.ticker << ", volume = " << p.volume << ", price = " << p.price;
-	return outputStream;
-}
 
 Order & Order::operator=(const Order &other) {
 	Order order;
@@ -72,16 +70,6 @@ Order & Order::operator=(const Order &other) {
 	return order;
 }
 
-Match & Match::operator=(const Match &other) {
-	Match match;
-	match.volume = other.volume;
-	match.price = other.price;
-	match.ticker = std::string(other.ticker);
-	match.trader_identifier =
-		std::string(other.trader_identifier);
-
-	return match;
-}
 
 const std::string Order::getTicker() {
 	return ticker;
@@ -96,6 +84,7 @@ OrderChange OrderChange::MakeChangesByComparison (const Order & initial,
 	change.ticker = after.ticker;
 	change.trader_identifier = after.trader_identifier;
 	change.reason = reason;
+	change.price = after.price;
 
 	return change;
 }
@@ -108,6 +97,7 @@ OrderChange OrderChange::ChangesOfOrderVanishing (const Order & order, ChangeRea
 	change.ticker = order.ticker;
 	change.trader_identifier = order.trader_identifier;
 	change.reason = reason;
+	change.price = order.price;
 
 	return change;
 }

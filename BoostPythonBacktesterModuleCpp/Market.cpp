@@ -52,8 +52,8 @@ void SngleTraderMarket::addAndCleanOrders() {
 }
 
 void SngleTraderMarket::sendAndCleanTickData() {
-	this->trader->recieveTickData(matchesToSend, anonimousDepths);
-	matchesToSend.clear();
+	this->trader->recieveTickData(changesToSend, anonimousDepths);
+	changesToSend.clear();
 }
 
 void SngleTraderMarket::sendAndCleanCandles() {

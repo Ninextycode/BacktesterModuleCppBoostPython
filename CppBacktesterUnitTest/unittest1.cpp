@@ -36,6 +36,11 @@ namespace Microsoft {
 				return w_message;
 				
 			}
+
+			template<> static wstring ToString<vector<OrderChange>>
+				(const vector<OrderChange>& d) {
+				return L"Wrong Changes Track";
+			}
 		}
 	}
 }
@@ -54,9 +59,7 @@ namespace CppBacktesterUnitTest {
 
 			auto y = marketDepth.getAnonimousDepth(1);
 
-			
-			Assert::IsTrue(true);
-			Assert::AreEqual(x, (*marketDepth.getAnonimousDepth(1)));
+			Assert::AreEqual(x, (marketDepth.getAnonimousDepth(1)));
 		}
 
 		TEST_METHOD(AddingOrders) {
@@ -161,19 +164,58 @@ namespace CppBacktesterUnitTest {
 			Assert::AreEqual(expectedDepth, m.getInternalDepth());
 		}
 
-		TEST_METHOD(MatchingOrders_OverSellOverBuy) {
+		TEST_METHOD(MatchingOrders_OrderChangerReport) {
 			MarketDepth m("s1");
-			Order o_buy = Order::Make_Limit_Order("Max", "stock", 10, 10);
-			m.addOrder(o_buy);
+			Order first_order = Order::Make_Limit_Order("Fin", "share", 10, 10);
+			m.addOrder(first_order);
 
-			Order o_match_buy = Order::Make_Limit_Order("Max", "stock", -20, 9);
+			Order second_order = Order::Make_Limit_Order("Stan", "share", -10, 10);
 
-			m.addOrder(o_match_buy);
+			auto changes = m.addOrder(second_order);
+			OrderChange finChange;
+			
+			finChange.currentVolume = 0;
+			finChange.price = 10;
+			finChange.reason = ChangeReason::Match;
+			finChange.ticker = "share";
+			finChange.trader_identifier = "Fin";
+			finChange.volumeChange = -10;
+			
 
-			MarketDepthData expectedDepth{
-				{ 9 ,{ Order::Make_Limit_Order("Max", "stock", -10, 9) } }
-			};
-			Assert::AreEqual(expectedDepth, m.getInternalDepth());
+			OrderChange stanChange;
+
+			stanChange.currentVolume = 0;
+			stanChange.price = 10;
+			stanChange.reason = ChangeReason::Match;
+			stanChange.ticker = "share";
+			stanChange.trader_identifier = "Stan";
+			stanChange.volumeChange = 10;
+
+			vector<OrderChange> expected_changes = { finChange , stanChange };
+			
+			Assert::AreEqual(expected_changes, changes);
+		}
+
+		TEST_METHOD(MatchingOrders_OrderCancelReport) {
+			MarketDepth m("s1");
+			Order o_sell = Order::Make_Limit_Order("Max", "share", -10, 11);
+			m.addOrder(o_sell);
+
+			auto changes = m.changeOrder(Order::Make_Limit_Order("Max", "share", 0, 11));
+
+			OrderChange change;
+
+			change.currentVolume = 0;
+			change.price = 11;
+			change.reason = ChangeReason::Cancellation;
+			change.ticker = "share";
+			change.trader_identifier = "Max";
+			change.volumeChange = 10;
+
+			vector<OrderChange> expected_changes = { change };
+
+			Assert::AreEqual(expected_changes, changes);
+
 		}
 	private:
 		MarketDepth marketDepth;

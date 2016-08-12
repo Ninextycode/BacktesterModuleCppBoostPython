@@ -54,6 +54,8 @@ struct DECLSPEC OrderChange {
 	int currentVolume;
 	std::string ticker;
 	std::string trader_identifier;
+
+	friend DECLSPEC bool operator==(const OrderChange& rhs, const OrderChange& lhs);
 };
 
 typedef std::unordered_map<int, std::list<Order>> MarketDepthData;

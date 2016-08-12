@@ -11,10 +11,8 @@ public:
 	
 	void addOrder(Order order);
 
-	/* removes all previous orders of current trader */
+
 	void changeOrder(Order order);
-	void cancelOrder(std::string trades_identifier,
-					 std::string ticker, int desiredVolume, int price);
 
 
 	void updateDepths();
@@ -27,7 +25,7 @@ private:
 	void sendAndCleanCandles();
 
 	std::vector<Order> ordersToAdd;
-	std::vector<Match> matchesToSend;
+	std::vector<OrderChange> changesToSend;
 	std::vector<Candel> candelsToSend;
 	std::unordered_map<std::string, std::vector<Candel>> historyData;
 	std::unordered_map<std::string, std::vector<int>> portfolio;
