@@ -6,7 +6,7 @@ public:
 	~SngleTraderMarket();
 
 	void setTrader(Trader* trader);
-	void loadHistoryData(std::string path);
+	void loadHistoryData(std::string path, std::vector<std::string> tickers);
 	void runFullTest();
 	
 	void addOrder(Order order);
@@ -14,11 +14,13 @@ public:
 
 	void changeOrder(Order order);
 
+	void requestCandles();
 
 	void updateDepths();
 	
 private:
 	int currentTick = 0;
+	int numberOfTics = -1;
 	void tick();
 	void sendAndCleanTickData();
 	void addAndCleanOrders();
@@ -35,5 +37,7 @@ private:
 
 	std::unordered_map<std::string, MarketDepth> depths;
 	std::unordered_map<std::string, AnonimousMaketDepth> anonimousDepths;
+
+	void readFile(std::string path, std::string ticker);
 };
 

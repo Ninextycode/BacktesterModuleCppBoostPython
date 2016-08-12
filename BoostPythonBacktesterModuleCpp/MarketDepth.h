@@ -11,6 +11,7 @@ public:
 	std::vector<OrderChange> changeOrder(Order order);
 	AnonimousMaketDepth  getAnonimousDepth(int depthLength);
 	const MarketDepthData & getInternalDepth();
+	void clearHistoryOrders();
 private:
 	std::vector<int> getUnsortedPrices();
 

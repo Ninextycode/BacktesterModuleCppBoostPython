@@ -11,15 +11,17 @@ struct DECLSPEC Candel {
 	int high;
 	int low;
 	int close;
-	int volume;
+	int volume = 0;
 	boost::posix_time::ptime datetime;
 };
 
 struct DECLSPEC Order {
 	static Order Make_Limit_Order(std::string trader_identifier, std::string ticker, int volume, int price);
 	
-	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream, const Order& p);
-	friend DECLSPEC bool operator==(const Order& rhs, const Order& lhs);
+	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream, 
+											 const Order& p);
+	friend DECLSPEC bool operator==(const Order& rhs,
+									const Order& lhs);
 	Order& operator=(const Order&);
 
 	int volume;
@@ -28,8 +30,6 @@ struct DECLSPEC Order {
 
 	std::string trader_identifier;
 	std::string ticker;
-
-	bool isHistory = false;  //Should be set true for orders created from history data 
 
 	const std::string getTicker();
 
@@ -45,12 +45,17 @@ enum class ChangeReason {
 
 struct DECLSPEC OrderChange {
 	static OrderChange MakeChangesByComparison(const Order& initial,
-											   const Order& after, ChangeReason reason);
-	static OrderChange ChangesOfOrderVanishing (const Order& order, ChangeReason reason);
+											   const Order& after, 
+											   ChangeReason reason,
+											   int matchPrice = 0);
+	static OrderChange ChangesOfOrderVanishing (const Order& order,
+												ChangeReason reason,
+												int matchPrice = 0);
 	
 	ChangeReason reason;
 	int volumeChange;
 	int price;
+	int matchPrice = 0;
 	int currentVolume;
 	std::string ticker;
 	std::string trader_identifier;

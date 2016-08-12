@@ -169,7 +169,7 @@ namespace CppBacktesterUnitTest {
 			Order first_order = Order::Make_Limit_Order("Fin", "share", 10, 10);
 			m.addOrder(first_order);
 
-			Order second_order = Order::Make_Limit_Order("Stan", "share", -10, 10);
+			Order second_order = Order::Make_Limit_Order("Stan", "share", -10, 5);
 
 			auto changes = m.addOrder(second_order);
 			OrderChange finChange;
@@ -180,16 +180,17 @@ namespace CppBacktesterUnitTest {
 			finChange.ticker = "share";
 			finChange.trader_identifier = "Fin";
 			finChange.volumeChange = -10;
-			
+			finChange.matchPrice = 10;
 
 			OrderChange stanChange;
 
 			stanChange.currentVolume = 0;
-			stanChange.price = 10;
+			stanChange.price = 5;
 			stanChange.reason = ChangeReason::Match;
 			stanChange.ticker = "share";
 			stanChange.trader_identifier = "Stan";
 			stanChange.volumeChange = 10;
+			finChange.matchPrice = 10;
 
 			vector<OrderChange> expected_changes = { finChange , stanChange };
 			

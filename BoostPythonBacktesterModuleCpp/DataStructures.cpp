@@ -76,7 +76,9 @@ const std::string Order::getTicker() {
 }
 
 OrderChange OrderChange::MakeChangesByComparison (const Order & initial,
-												 const Order & after, ChangeReason reason) {
+												 const Order & after,
+												  ChangeReason reason,
+												  int matchPrice) {
 	OrderChange change;
 
 	change.volumeChange = after.volume - initial.volume;
@@ -85,11 +87,14 @@ OrderChange OrderChange::MakeChangesByComparison (const Order & initial,
 	change.trader_identifier = after.trader_identifier;
 	change.reason = reason;
 	change.price = after.price;
+	change.matchPrice = matchPrice;
 
 	return change;
 }
 
-OrderChange OrderChange::ChangesOfOrderVanishing (const Order & order, ChangeReason reason) {
+OrderChange OrderChange::ChangesOfOrderVanishing (const Order & order,
+												  ChangeReason reason,
+												  int matchPrice) {
 	OrderChange change;
 
 	change.volumeChange = -order.volume;
@@ -98,6 +103,7 @@ OrderChange OrderChange::ChangesOfOrderVanishing (const Order & order, ChangeRea
 	change.trader_identifier = order.trader_identifier;
 	change.reason = reason;
 	change.price = order.price;
+	change.matchPrice = matchPrice;
 
 	return change;
 }

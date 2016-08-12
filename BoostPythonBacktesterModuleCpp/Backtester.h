@@ -11,6 +11,7 @@
 #include <list>
 #include <ostream>
 #include <algorithm>
+#include <fstream>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
