@@ -21,6 +21,8 @@ private:
 	void tryMatchOrderWithExactPriceOrders(Order& order,
 								int price);
 
+	void addChangeIfItIsNotHistory(OrderChange change);
+
 	void removeOrdersOfSuchTraderWithSuchPrice(Order order);
 	std::vector<OrderChange> currentChanges;
 	std::string ticker;

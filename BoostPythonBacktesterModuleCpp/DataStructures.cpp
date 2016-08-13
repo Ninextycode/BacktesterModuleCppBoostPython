@@ -107,3 +107,25 @@ OrderChange OrderChange::ChangesOfOrderVanishing (const Order & order,
 
 	return change;
 }
+
+AnonimousmarketDepthItem::AnonimousmarketDepthItem() {
+}
+
+AnonimousmarketDepthItem::AnonimousmarketDepthItem(int volume, int price) :
+	volume(volume), price(price) {
+
+}
+
+bool operator==(const AnonimousmarketDepthItem & rhs, const AnonimousmarketDepthItem & lhs) {
+	return rhs.price == lhs.price && rhs.volume == lhs.volume;
+}
+
+bool operator==(const Candel & rhs, const Candel & lhs) {
+	return
+		rhs.open == lhs.open &&
+		rhs.high == lhs.high &&
+		rhs.low == lhs.low &&
+		rhs.close == lhs.close &&
+		rhs.volume == lhs.volume &&
+		rhs.datetime == lhs.datetime;
+}

@@ -1,6 +1,4 @@
 #pragma once
-typedef std::vector<std::tuple<int, int>> AnonimousMaketDepth;
-
 
 enum class OrderType {
 	marketOrder, limitOrder
@@ -13,6 +11,9 @@ struct DECLSPEC Candel {
 	int close;
 	int volume = 0;
 	boost::posix_time::ptime datetime;
+
+	friend DECLSPEC bool operator==(const Candel& rhs,
+									const Candel& lhs);
 };
 
 struct DECLSPEC Order {
@@ -64,3 +65,13 @@ struct DECLSPEC OrderChange {
 };
 
 typedef std::unordered_map<int, std::list<Order>> MarketDepthData;
+
+struct DECLSPEC AnonimousmarketDepthItem {
+	AnonimousmarketDepthItem();
+	AnonimousmarketDepthItem(int volume, int price);
+	int price;
+	int volume;
+	friend DECLSPEC bool operator==(const AnonimousmarketDepthItem& rhs, const AnonimousmarketDepthItem& lhs);
+};
+
+typedef std::vector<AnonimousmarketDepthItem> AnonimousMaketDepth;

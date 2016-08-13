@@ -18,6 +18,10 @@ namespace Microsoft {
 				(const AnonimousMaketDepth& d) {
 				return L"Wrong Anonimous Depth";
 			}
+			template<> static wstring ToString<CandesVectorMap>
+				(const CandesVectorMap& d) {
+				return L"Wrong CandesVectorMap";
+			}
 			template<> static wstring ToString<MarketDepthData>
 				(const MarketDepthData& d) {
 
@@ -50,17 +54,6 @@ namespace CppBacktesterUnitTest {
 
 	TEST_CLASS(UnitTest1) {
 	public:
-		TEST_METHOD(TestMethod1) {
-			MarketDepth m();
-			auto x = AnonimousMaketDepth{
-				std::tuple<int, int>(1, 2),
-				std::tuple<int, int>(3, 4)
-			};
-
-			auto y = marketDepth.getAnonimousDepth(1);
-
-			Assert::AreEqual(x, (marketDepth.getAnonimousDepth(1)));
-		}
 
 		TEST_METHOD(AddingOrders) {
 
@@ -217,6 +210,77 @@ namespace CppBacktesterUnitTest {
 
 			Assert::AreEqual(expected_changes, changes);
 
+		}
+
+		TEST_METHOD(AddingOrders_DeprioritizeHistoryOrders) {
+			MarketDepth m("s1");
+			
+			Order notHistoryOrder = Order::Make_Limit_Order("Max", "stock", 1, 1);
+			//check that OrdersFromCandelBuilder::HISTORY_IDENTIFIER == history
+			Order historyOrder = 
+				Order::Make_Limit_Order("history", "stock", 1, 1);
+
+			m.addOrder(notHistoryOrder);
+			m.addOrder(historyOrder);
+
+			MarketDepthData expectedDepth{
+				{ 1 ,{ notHistoryOrder,  historyOrder } }
+			};
+			Assert::AreEqual(expectedDepth, m.getInternalDepth());
+		}
+
+		TEST_METHOD(AnonimousDepthConstruction) {
+			MarketDepth m("s1");
+
+			vector<Order> orders;
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", 1, 1));
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", 1, 2));
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", 1, 3));
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", 1, 4));
+
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", 1, 5));
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", 1, 5));
+
+
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", -1, 6));
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", -1, 6));
+
+			orders.push_back(Order::Make_Limit_Order("Max", "stock", -1, 7));
+
+
+			AnonimousMaketDepth expectedDepth = { 
+				{1, 3}, {1, 4}, {2, 5},
+				{-2, 6}, {-1, 7}
+			};
+
+			for (Order o : orders) {
+				m.addOrder(o);
+			}
+
+			Assert::AreEqual(expectedDepth, m.getAnonimousDepth(3));
+		}
+
+		TEST_METHOD(ReadingCsvFile) {
+			string tofile = "datetime,close,high,low,open,volume\n";
+			tofile += "1998-08-06 10:00:00,1,2,3,4,5\n";
+			tofile += "1998-08-06 10:00:00,1,2,3,4,5\n";
+			tofile += "1998-08-06 10:00:00,1,2,3,4,5\n";
+			ofstream out("stock.csv");
+			if (out.is_open()) {
+				out << tofile;
+				out.close();
+			}
+			SngleTraderMarket m;
+			m.loadHistoryData("", { "stock" });
+			auto actual = m.getInternalHistoryCandles();
+			Candel c;
+			c.open = 1;
+			c.high = 2;
+			c.low = 3;
+			c.close = 4;
+			c.volume = 5;
+			c.datetime = boost::posix_time::time_from_string("1998-08-06 10:00:00");
+			Assert::AreEqual({ { "stock" , {c,c,c} } }, actual);
 		}
 	private:
 		MarketDepth marketDepth;

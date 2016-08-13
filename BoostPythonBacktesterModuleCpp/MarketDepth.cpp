@@ -77,28 +77,24 @@ void MarketDepth::tryMatchOrderWithExactPriceOrders(Order& order, int price) {
 	for (auto it = orderList.begin(); it != orderList.end(); /* "it" is incrementing */) {
 		if (abs(order.volume) >= abs(it->volume)) { //Vanishing of order already being inside depth
 
-			this->currentChanges.
-					push_back(OrderChange::ChangesOfOrderVanishing(*it, ChangeReason::Match, it->price));
+			addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanishing(*it, ChangeReason::Match, it->price));
 
 			Order oldOrder = order;
 			order.volume += it->volume;
 
-			this->currentChanges.
-				push_back(OrderChange::MakeChangesByComparison(oldOrder, order, ChangeReason::Match, it->price));
+			addChangeIfItIsNotHistory(OrderChange::MakeChangesByComparison(oldOrder, order, ChangeReason::Match, it->price));
 			
 			
 			it = orderList.erase(it); // <-- here incrementation
 		} else {  //Vanishing of newly recieved order
 
-			this->currentChanges.
-				push_back(OrderChange::ChangesOfOrderVanishing(order, ChangeReason::Match, it->price));
+			addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanishing(order, ChangeReason::Match, it->price));
 			
 			Order oldOrder = *it;
 			it->volume += order.volume;
 			order.volume = 0;
 
-			this->currentChanges.
-				push_back(OrderChange::MakeChangesByComparison(oldOrder, *it, ChangeReason::Match, it->price));
+			addChangeIfItIsNotHistory(OrderChange::MakeChangesByComparison(oldOrder, *it, ChangeReason::Match, it->price));
 					
 			break;
 		}
@@ -108,6 +104,12 @@ void MarketDepth::tryMatchOrderWithExactPriceOrders(Order& order, int price) {
 	}
 }
 
+void MarketDepth::addChangeIfItIsNotHistory(OrderChange change) {
+	if (change.trader_identifier != OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
+		this->currentChanges.
+			push_back(change);
+	}
+}
 
 std::vector<OrderChange>  MarketDepth::changeOrder(Order order) {
 	currentChanges.clear();
@@ -130,8 +132,7 @@ void MarketDepth::removeOrdersOfSuchTraderWithSuchPrice(Order newOrder) {
 		for (auto it = orderList.begin(); it != orderList.end(); ) {
 			if (it->trader_identifier == newOrder.trader_identifier) {
 
-				this->currentChanges.
-					push_back(OrderChange::ChangesOfOrderVanishing(*it, ChangeReason::Cancellation));
+				addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanishing(*it, ChangeReason::Cancellation));
 
 				it = orderList.erase(it);
 
@@ -143,10 +144,33 @@ void MarketDepth::removeOrdersOfSuchTraderWithSuchPrice(Order newOrder) {
 }
 
 AnonimousMaketDepth  MarketDepth::getAnonimousDepth(int depthLength) {
-	return std::vector<std::tuple<int, int>>{ 
-		std::tuple<int, int>(1,2),
-		std::tuple<int, int>(3,4)
-	};
+	auto prices = getUnsortedPrices();
+	std::sort(prices.begin(), prices.end());
+
+	AnonimousMaketDepth depth;
+	int firstSell;
+	for (firstSell = 0; totalDepth[prices[firstSell]].begin()->volume > 0; firstSell++);
+
+	for (int i = firstSell - depthLength; i < firstSell &&  i < prices.size(); i++) {
+		AnonimousmarketDepthItem item;
+		item.volume = 0;
+		for (Order o : totalDepth[prices[i]]) {
+			item.volume += o.volume;
+		}
+		item.price = prices[i];
+		depth.push_back(item);
+	}
+
+	for (int i = firstSell; i < firstSell+ depthLength &&  i < prices.size(); i++) {
+		AnonimousmarketDepthItem item;
+		item.volume = 0;
+		for (Order o : totalDepth[prices[i]]) {
+			item.volume += o.volume;
+		}
+		item.price = prices[i];
+		depth.push_back(item);
+	}
+	return depth;
 }
 
 MarketDepthData const &  MarketDepth::getInternalDepth() {

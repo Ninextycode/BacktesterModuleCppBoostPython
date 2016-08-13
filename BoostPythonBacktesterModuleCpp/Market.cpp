@@ -14,7 +14,7 @@ void SngleTraderMarket::setTrader(Trader * trader) {
 }
 
 void SngleTraderMarket::loadHistoryData(std::string path, std::vector<std::string> tickers) {
-	if (path.at(path.length - 1) != '/') {
+	if (path.length() != 0 && path[path.length() - 1] != '/') {
 		path += "/";
 	}
 	for (auto ticker : tickers) {
@@ -28,9 +28,9 @@ void SngleTraderMarket::readFile(std::string path, std::string ticker) {
 	if (!input.is_open()) {
 		throw std::invalid_argument("Wrong path");
 	}
-
-	while (!input.eof()) {
-		std::string s;
+	std::string s;
+	std::getline(input, s);
+	while (!input.eof()) {		
 		std::getline(input, s);
 
 		std::string datetime = s.substr(0, s.find_first_of(","));
@@ -64,6 +64,7 @@ void SngleTraderMarket::readFile(std::string path, std::string ticker) {
 	} else {
 		numberOfTics = min(historyData[ticker].size(), numberOfTics);
 	}
+	input.close();
 }
 
 void SngleTraderMarket::runFullTest() {
@@ -77,7 +78,8 @@ void SngleTraderMarket::addOrder(Order order) {
 }
 
 void SngleTraderMarket::changeOrder(Order order) {
-	//depths[ticker].cancelOrder(trades_identifier, );
+	auto changes = depths[order.ticker].changeOrder(order);
+	addToChangesToSend(changes);
 }
 
 void SngleTraderMarket::tick() {
@@ -89,14 +91,19 @@ void SngleTraderMarket::tick() {
 
 void SngleTraderMarket::updateDepths() {
 	for (auto ticker : tickers) {
-		depths[ticker].clearHistoryOrders();
+		clearDepthFromHistoryOrders(ticker);
 		auto currentCandle = historyData[ticker][currentTick];
 		auto orders = OrdersFromCandelBuilder::ordersFromCandel(currentCandle, ticker);
 		for (Order order : orders) {
 			auto changes = depths[ticker].addOrder(order);
-			changesToSend.insert(changesToSend.end(), changes.begin(), changes.end());
+			addToChangesToSend(changes);
 		}
+		anonimousDepths[ticker] = depths[ticker].getAnonimousDepth(DEPTH_LENGTH_PUBLIC);
 	}
+}
+
+void  SngleTraderMarket::clearDepthFromHistoryOrders(std::string ticker) {
+	depths[ticker].clearHistoryOrders();
 }
 
 void SngleTraderMarket::addAndCleanOrders() {
@@ -113,9 +120,27 @@ void SngleTraderMarket::sendAndCleanTickData() {
 }
 
 void SngleTraderMarket::sendAndCleanCandles() {
-	this->trader->recieveCandels(candelsToSend);
-	candelsToSend.clear();
+	for (auto ticker : tickers) {
+		if (candelsToSend[ticker].size() > 0) {
+			this->trader->recieveCandels(candelsToSend[ticker]);
+		}
+		candelsToSend[ticker].clear();
+	}
 }
 
-void loadHistoryData(std::string path) {
+
+void SngleTraderMarket::requestCandles(std::string ticker, int length) {
+	// additional +1 for not including begin and including end
+	int begin = max(0, currentTick + 1 - length + 1);
+	int end = min(numberOfTics, currentTick + 1 + 1);
+	candelsToSend[ticker] = std::vector<Candel>(historyData[ticker].begin()+ begin,
+											 historyData[ticker].begin() + end);
+}
+
+void SngleTraderMarket::addToChangesToSend(std::vector<OrderChange>& changes) {
+	changesToSend.insert(changesToSend.end(), changes.begin(), changes.end());
+}
+
+const CandesVectorMap & SngleTraderMarket::getInternalHistoryCandles() {
+	return this->historyData;
 }
