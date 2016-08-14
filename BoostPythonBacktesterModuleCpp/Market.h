@@ -4,7 +4,7 @@ typedef std::unordered_map<std::string, std::vector<Candel>> CandesVectorMap;
 
 class DECLSPEC SngleTraderMarket {
 public:
-	static const int DEPTH_LENGTH_PUBLIC = 5;
+	int DEPTH_LENGTH_PUBLIC = 5;
 	
 	SngleTraderMarket();
 	~SngleTraderMarket();
@@ -19,7 +19,7 @@ public:
 
 	void requestCandles(std::string ticker, int length);
 
-	void updateDepths();
+
 	const CandesVectorMap & getInternalHistoryCandles();
 
 	const std::unordered_map<std::string, int>& getPortfio();
@@ -30,6 +30,7 @@ private:
 	int numberOfTics = -1;
 
 	void tick();
+	void updateDepths();
 	void sendAndCleanTickData();
 	void addAndCleanOrders();
 	void sendAndCleanCandles();

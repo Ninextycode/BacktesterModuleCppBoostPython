@@ -153,7 +153,7 @@ AnonimousMaketDepth  MarketDepth::getAnonimousDepth(int depthLength) {
 		 firstSell++);
 
 	for (int i = max(0, firstSell - depthLength); i < firstSell &&  i < prices.size(); i++) {
-		AnonimousmarketDepthItem item;
+		AnonimousMarketDepthItem item;
 		item.volume = 0;
 		for (Order o : totalDepth[prices[i]]) {
 			item.volume += o.volume;
@@ -163,7 +163,7 @@ AnonimousMaketDepth  MarketDepth::getAnonimousDepth(int depthLength) {
 	}
 
 	for (int i = firstSell; i < (firstSell+ depthLength) &&  i < prices.size(); i++) {
-		AnonimousmarketDepthItem item;
+		AnonimousMarketDepthItem item;
 		item.volume = 0;
 		for (Order o : totalDepth[prices[i]]) {
 			item.volume += o.volume;

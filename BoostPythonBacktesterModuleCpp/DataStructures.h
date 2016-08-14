@@ -45,6 +45,8 @@ enum class ChangeReason {
 	Match, Cancellation, Unknown
 };
 
+std::ostream& operator<<(std::ostream & outputStream, const  ChangeReason & p);
+
 struct DECLSPEC OrderChange {
 	static OrderChange MakeChangesByComparison(const Order& initial,
 											   const Order& after, 
@@ -56,23 +58,27 @@ struct DECLSPEC OrderChange {
 	
 	ChangeReason reason;
 	int volumeChange;
-	int price;
+	int worstPossiblePrice;
 	int matchPrice = 0;
 	int currentVolume;
 	std::string ticker;
 	std::string trader_identifier;
 
 	friend DECLSPEC bool operator==(const OrderChange& rhs, const OrderChange& lhs);
+	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream,
+											 const OrderChange& p);
 };
 
 typedef std::unordered_map<int, std::list<Order>> MarketDepthData;
 
-struct DECLSPEC AnonimousmarketDepthItem {
-	AnonimousmarketDepthItem();
-	AnonimousmarketDepthItem(int volume, int price);
+struct DECLSPEC AnonimousMarketDepthItem {
+	AnonimousMarketDepthItem();
+	AnonimousMarketDepthItem(int volume, int price);
 	int price;
 	int volume;
-	friend DECLSPEC bool operator==(const AnonimousmarketDepthItem& rhs, const AnonimousmarketDepthItem& lhs);
+	friend DECLSPEC bool operator==(const AnonimousMarketDepthItem& rhs, const AnonimousMarketDepthItem& lhs);
+	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream,
+											 const AnonimousMarketDepthItem& p);
 };
 
-typedef std::vector<AnonimousmarketDepthItem> AnonimousMaketDepth;
+typedef std::vector<AnonimousMarketDepthItem> AnonimousMaketDepth;

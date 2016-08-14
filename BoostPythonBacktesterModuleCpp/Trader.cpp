@@ -12,9 +12,13 @@ Trader::Trader(std::string identifier) {
 void Trader::recieveTickData(std::vector<OrderChange> changes,
 							 std::unordered_map<std::string, AnonimousMaketDepth> depth) {
 	for (OrderChange change : changes) {
-		this->orders[change.ticker][change.price] += change.volumeChange;
+		this->orders[change.ticker][change.worstPossiblePrice] += change.volumeChange;
+		if (orders[change.ticker][change.worstPossiblePrice] == 0) {
+			orders[change.ticker].erase(change.worstPossiblePrice);
+		}
 	}
-	this->tickAction(changes, depth);
+	
+	this->newTickAction(changes, depth);
 }
 
 void Trader::recieveCandels(std::string ticker, std::vector<Candel> candels) {
@@ -23,6 +27,10 @@ void Trader::recieveCandels(std::string ticker, std::vector<Candel> candels) {
 
 void Trader::makeOrder(Order order) {
 	this->market->addOrder(order);
+}
+
+const std::unordered_map<std::string, int>& Trader::getPortfio() {
+	return this->market->getPortfio();
 }
 
 void Trader::changeOrder(Order order) {

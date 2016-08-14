@@ -202,7 +202,7 @@ namespace CppBacktesterUnitTest {
 			OrderChange finChange;
 			
 			finChange.currentVolume = 0;
-			finChange.price = 10;
+			finChange.worstPossiblePrice = 10;
 			finChange.reason = ChangeReason::Match;
 			finChange.ticker = "share";
 			finChange.trader_identifier = "Fin";
@@ -212,7 +212,7 @@ namespace CppBacktesterUnitTest {
 			OrderChange stanChange;
 
 			stanChange.currentVolume = 0;
-			stanChange.price = 5;
+			stanChange.worstPossiblePrice = 5;
 			stanChange.reason = ChangeReason::Match;
 			stanChange.ticker = "share";
 			stanChange.trader_identifier = "Stan";
@@ -234,7 +234,7 @@ namespace CppBacktesterUnitTest {
 			OrderChange change;
 
 			change.currentVolume = 0;
-			change.price = 11;
+			change.worstPossiblePrice = 11;
 			change.reason = ChangeReason::Cancellation;
 			change.ticker = "share";
 			change.trader_identifier = "Max";
@@ -348,7 +348,7 @@ namespace CppBacktesterUnitTest {
 				TraderSaver(string identifier) :Trader(identifier){};
 				~TraderSaver() {};
 				int tick = 0;
-				void tickAction(std::vector<OrderChange> matcher, 
+				void newTickAction(std::vector<OrderChange> matcher, 
 								std::unordered_map<std::string, AnonimousMaketDepth> depth) {
 					if (tick == 5) {
 						this->market->requestCandles("share", 4);
@@ -417,7 +417,7 @@ namespace CppBacktesterUnitTest {
 				TraderBuyer(string identifier) :Trader(identifier) {};
 				~TraderBuyer() {};
 				int tick = 0;
-				void tickAction(std::vector<OrderChange> matches,
+				void newTickAction(std::vector<OrderChange> matches,
 								std::unordered_map<std::string, AnonimousMaketDepth> depth) {
 					if (tick == 5) {
 						this->makeOrder(this->createLimitOrder("share", 5, 41));
@@ -471,7 +471,7 @@ namespace CppBacktesterUnitTest {
 				TraderSeller(string identifier) :Trader(identifier) {};
 				~TraderSeller() {};
 				int tick = 0;
-				void tickAction(std::vector<OrderChange> matches,
+				void newTickAction(std::vector<OrderChange> matches,
 								std::unordered_map<std::string, AnonimousMaketDepth> depth) {
 					if (tick == 5) {
 						this->makeOrder(this->createLimitOrder("share", -5, 44)); 
@@ -525,7 +525,7 @@ namespace CppBacktesterUnitTest {
 				TraderDepthSaver(string identifier) :Trader(identifier) {};
 				~TraderDepthSaver() {};
 				int tick = 0;
-				void tickAction(std::vector<OrderChange> matches,
+				void newTickAction(std::vector<OrderChange> matches,
 								std::unordered_map<std::string, AnonimousMaketDepth> depth) {
 					if (tick == 5) {
 						depth5 = depth["share"];
