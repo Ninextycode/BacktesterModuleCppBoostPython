@@ -12,6 +12,7 @@ struct DECLSPEC Candel {
 	int volume = 0;
 	boost::posix_time::ptime datetime;
 
+	void setdatetime(std::string datetime);
 	friend DECLSPEC bool operator==(const Candel& rhs,
 									const Candel& lhs);
 };

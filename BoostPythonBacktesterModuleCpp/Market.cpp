@@ -3,6 +3,7 @@
 
 
 SngleTraderMarket::SngleTraderMarket() {
+	this->portfolio["money"] = 0;
 }
 
 
@@ -85,6 +86,7 @@ void SngleTraderMarket::changeOrder(Order order) {
 void SngleTraderMarket::tick() {
 	this->updateDepths();
 	this->addAndCleanOrders();
+	this->updatePortfolio();
 	this->sendAndCleanTickData();
 	this->sendAndCleanCandles();
 }
@@ -106,10 +108,19 @@ void  SngleTraderMarket::clearDepthFromHistoryOrders(std::string ticker) {
 	depths[ticker].clearHistoryOrders();
 }
 
+void SngleTraderMarket::updatePortfolio() {
+	for (OrderChange change : changesToSend) {
+		portfolio[change.ticker] += (-change.volumeChange);
+		portfolio["money"] += (change.volumeChange * change.matchPrice
+							   - abs(change.volumeChange) * this->commissions[change.ticker]);
+	}
+}
+
 void SngleTraderMarket::addAndCleanOrders() {
 	for (Order order : this->ordersToAdd) {
 		auto desiderDepth = this->depths.find(order.ticker);
-		desiderDepth->second.addOrder(order);		
+		auto changes = desiderDepth->second.addOrder(order);	
+		addToChangesToSend(changes);
 	}
 	ordersToAdd.clear();
 }
@@ -122,7 +133,7 @@ void SngleTraderMarket::sendAndCleanTickData() {
 void SngleTraderMarket::sendAndCleanCandles() {
 	for (auto ticker : tickers) {
 		if (candelsToSend[ticker].size() > 0) {
-			this->trader->recieveCandels(candelsToSend[ticker]);
+			this->trader->recieveCandels(ticker, candelsToSend[ticker]);
 		}
 		candelsToSend[ticker].clear();
 	}
@@ -143,4 +154,12 @@ void SngleTraderMarket::addToChangesToSend(std::vector<OrderChange>& changes) {
 
 const CandesVectorMap & SngleTraderMarket::getInternalHistoryCandles() {
 	return this->historyData;
+}
+
+const std::unordered_map<std::string, int>& SngleTraderMarket::getPortfio() {
+	return this->portfolio;
+}
+
+void SngleTraderMarket::setComission(std::string ticker, int comission) {
+	this->commissions[ticker] = comission;
 }

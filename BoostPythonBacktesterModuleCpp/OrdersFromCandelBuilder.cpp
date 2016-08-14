@@ -12,5 +12,5 @@ std::vector<Order> OrdersFromCandelBuilder::ordersFromCandel(Candel candel, std:
 	for (int price = candel.close + depthLevel; price > candel.close; price--) {
 		orders.push_back(Order::Make_Limit_Order(HISTORY_IDENTIFIER, ticker, -volumePerPrice, price));
 	}
-	return std::vector<Order>();
+	return orders;
 }

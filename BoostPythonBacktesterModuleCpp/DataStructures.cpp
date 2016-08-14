@@ -129,3 +129,7 @@ bool operator==(const Candel & rhs, const Candel & lhs) {
 		rhs.volume == lhs.volume &&
 		rhs.datetime == lhs.datetime;
 }
+
+void Candel::setdatetime(std::string datetime) {
+	this->datetime = boost::posix_time::time_from_string(datetime);
+}

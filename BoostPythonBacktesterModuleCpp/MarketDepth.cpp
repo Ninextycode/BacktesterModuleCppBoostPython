@@ -149,9 +149,10 @@ AnonimousMaketDepth  MarketDepth::getAnonimousDepth(int depthLength) {
 
 	AnonimousMaketDepth depth;
 	int firstSell;
-	for (firstSell = 0; totalDepth[prices[firstSell]].begin()->volume > 0; firstSell++);
+	for (firstSell = 0; firstSell < prices.size()  &&  totalDepth[prices[firstSell]].begin()->volume > 0;
+		 firstSell++);
 
-	for (int i = firstSell - depthLength; i < firstSell &&  i < prices.size(); i++) {
+	for (int i = max(0, firstSell - depthLength); i < firstSell &&  i < prices.size(); i++) {
 		AnonimousmarketDepthItem item;
 		item.volume = 0;
 		for (Order o : totalDepth[prices[i]]) {
@@ -161,7 +162,7 @@ AnonimousMaketDepth  MarketDepth::getAnonimousDepth(int depthLength) {
 		depth.push_back(item);
 	}
 
-	for (int i = firstSell; i < firstSell+ depthLength &&  i < prices.size(); i++) {
+	for (int i = firstSell; i < (firstSell+ depthLength) &&  i < prices.size(); i++) {
 		AnonimousmarketDepthItem item;
 		item.volume = 0;
 		for (Order o : totalDepth[prices[i]]) {
@@ -178,14 +179,18 @@ MarketDepthData const &  MarketDepth::getInternalDepth() {
 }
 
 void MarketDepth::clearHistoryOrders() {
-	for (auto pair : totalDepth) {
-		auto orderList = pair.second;
+	auto prices = getUnsortedPrices();
+	for (int price : prices) {
+		std::list<Order>& orderList = totalDepth[price];
 		for (auto it = orderList.begin(); it != orderList.end(); ) {
 			if (it->trader_identifier == OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
 				it = orderList.erase(it);
 			} else {
 				it++;
 			}
+		}
+		if (totalDepth[price].size() == 0) {
+			totalDepth.erase(price);
 		}
 	}
 }
