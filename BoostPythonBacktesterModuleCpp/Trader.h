@@ -1,6 +1,6 @@
 #pragma once
 
-class SngleTraderMarket;
+class SingleTraderMarket;
 
 class DECLSPEC Trader {
 public:
@@ -18,19 +18,21 @@ public:
 
 	void recieveCandels(std::string ticker, std::vector<Candel> candels);
 
-	void setMarket(SngleTraderMarket* market);
+	void setMarket(SingleTraderMarket* market);
 	void changeOrder(Order order);
 	void makeOrder(Order order);
+	void requestCandels(std::string ticker, int length);
 
 	const std::unordered_map<std::string, int>& getPortfio();
 	
 	Order createLimitOrder(std::string ticker, int volume, int price);
+	Order createMarketOrder(std::string ticker, int volume);
 	std::unordered_map<std::string, std::unordered_map<int, int>> orders;
 protected:
 	
 	// ticker - price - volume map
 	
-	SngleTraderMarket* market;
+	SingleTraderMarket* market;
 	std::string identifier;
 };
 

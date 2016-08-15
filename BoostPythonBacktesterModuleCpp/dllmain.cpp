@@ -44,6 +44,27 @@ struct unordered_map_to_python {
 	}
 };
 
+template<class containedType>
+struct custom_vector_from_seq {
+	custom_vector_from_seq() { converter::registry::push_back(&convertible, &construct, type_id<vector<containedType> >()); }
+	static void* convertible(PyObject* obj_ptr) {
+		if (!PySequence_Check(obj_ptr) || !PyObject_HasAttrString(obj_ptr, "__len__")) return 0;
+		return obj_ptr;
+	}
+	static void construct(PyObject* obj_ptr, converter::rvalue_from_python_stage1_data* data) {
+		void* storage = ((converter::rvalue_from_python_storage<vector<containedType> >*)(data))->storage.bytes;
+		new (storage) vector<containedType>();
+		vector<containedType>* v = (vector<containedType>*)(storage);
+		int l = PySequence_Size(obj_ptr); 
+		if (l<0) 
+			abort();
+		v->reserve(l);
+		for (int i = 0; i<l; i++) {
+			v->push_back(extract<containedType>(PySequence_GetItem(obj_ptr, i))); 
+		}
+		data->convertible = storage;
+	}
+};
 
 struct TraderWrap : Trader, wrapper<Trader> {
 	TraderWrap(string identifier):Trader(identifier){
@@ -59,11 +80,17 @@ struct TraderWrap : Trader, wrapper<Trader> {
 };
 
 BOOST_PYTHON_MODULE(backtester) {
+	//to convert from python list of strings to c++ vector wher receiving tickers
+	custom_vector_from_seq<string> conv;
+
 	//changes received by trader
 	to_python_converter <vector<OrderChange>, stdvector_to_python<OrderChange>>();
 
 	//candels received by trader
 	to_python_converter <vector<Candel>, stdvector_to_python<Candel>>();
+
+	//all history data
+	to_python_converter <CandesVectorMap, unordered_map_to_python<string, vector<Candel>>>();
 
 	//orders in trader of exact stock 
 	to_python_converter <unordered_map<int, int>,
@@ -91,14 +118,25 @@ BOOST_PYTHON_MODULE(backtester) {
 		.value("Cancellation", ChangeReason::Cancellation)
 		.value("Unknown", ChangeReason::Unknown);
 
-	class_<AnonimousMarketDepthItem>("AnonimousMarketDepthItem") 
+	class_<Candel>("Candel")
+		.def_readwrite("open", &Candel::open)
+		.def_readwrite("high", &Candel::high)
+		.def_readwrite("low", &Candel::low)
+		.def_readwrite("close", &Candel::close)
+		.def_readwrite("volume", &Candel::volume)
+		.add_property("datetime", &Candel::getdatetime)
+		.def(self == self)
+		.def(self_ns::str(self_ns::self))
+		.def(self_ns::repr(self_ns::self));
+
+	class_<AnonimousMarketDepthItem>("AnonimousMarketDepthItem")
 		.def(init<int, int>(args("price", "volume")))
 		.def(init<>())
 		.def_readwrite("price", &AnonimousMarketDepthItem::price)
 		.def_readwrite("volume", &AnonimousMarketDepthItem::volume)
 		.def(self == self)
 		.def(self_ns::str(self_ns::self))
-		.def(self_ns::repr(self_ns::self));	
+		.def(self_ns::repr(self_ns::self));
 
 	class_<OrderChange>("OrderChange")
 		.def_readwrite("current_volume", &OrderChange::currentVolume)
@@ -130,13 +168,16 @@ BOOST_PYTHON_MODULE(backtester) {
 		.def(self_ns::repr(self_ns::self));
 
 
-	class_<SngleTraderMarket>("Market")
-		.def("set_trader", &SngleTraderMarket::setTrader)
-		.def("load_history_data", &SngleTraderMarket::loadHistoryData)
-		.def("run_full_test", &SngleTraderMarket::runFullTest)
-		.def("request_candles", &SngleTraderMarket::requestCandles)
-		.def("set_comission", &SngleTraderMarket::setComission)
-		.def_readwrite("DEPTH_LENGTH_PUBLIC", &SngleTraderMarket::DEPTH_LENGTH_PUBLIC);
+	class_<SingleTraderMarket>("Market")
+		.def("set_trader", &SingleTraderMarket::setTrader)
+		.def("load_history_data", &SingleTraderMarket::loadHistoryData)
+		.def("run_full_test", &SingleTraderMarket::runFullTest)
+		.def("request_candles", &SingleTraderMarket::requestCandles)
+		.def("set_comission", &SingleTraderMarket::setComission)
+		.def_readwrite("DEPTH_LENGTH_PUBLIC", &SingleTraderMarket::DEPTH_LENGTH_PUBLIC)
+		.def_readonly("DEPTH_LENGTH_PUBLIC", &SingleTraderMarket::DEPTH_LENGTH_PUBLIC)
+		.def("get_internal_history_candles", &SingleTraderMarket::getInternalHistoryCandles,
+					   return_value_policy<copy_const_reference>());
 
 	class_<TraderWrap, boost::noncopyable>("Trader", init<string>(args("identifier")))		
 		.def("tick_action", pure_virtual(&Trader::newTickAction))
@@ -144,12 +185,13 @@ BOOST_PYTHON_MODULE(backtester) {
 
 		.def("change_order", &Trader::changeOrder, args("oredr"))
 		.def("make_order", &Trader::makeOrder, args("oredr"))
-		.def("get_portfio", &Trader::getPortfio, return_value_policy<copy_const_reference>())
+		.def("get_portfolio", &Trader::getPortfio, return_value_policy<copy_const_reference>())
 
 		.def("set_market", &Trader::setMarket, args("market"))
 		.def("create_limit_order", &Trader::createLimitOrder, args("ticker", "volume", "price"))
-		.def_readonly("orders", &Trader::orders) 
-		;
+		.def("create_market_order", &Trader::createMarketOrder, args("ticker", "volume"))
+		.def("request_candles", &Trader::requestCandels, args("tickrt", "length"))
+		.add_property("orders", make_getter(&Trader::orders, return_value_policy<return_by_value>()));
 
 }
 

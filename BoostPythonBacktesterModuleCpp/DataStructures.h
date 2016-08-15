@@ -13,8 +13,11 @@ struct DECLSPEC Candel {
 	boost::posix_time::ptime datetime;
 
 	void setdatetime(std::string datetime);
+	std::string getdatetime();
 	friend DECLSPEC bool operator==(const Candel& rhs,
 									const Candel& lhs);
+	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream,
+											 const Candel& p);
 };
 
 struct DECLSPEC Order {

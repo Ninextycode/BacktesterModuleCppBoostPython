@@ -2,19 +2,19 @@
 #include "Backtester.h"
 
 
-SngleTraderMarket::SngleTraderMarket() {
+SingleTraderMarket::SingleTraderMarket() {
 	this->portfolio["money"] = 0;
 }
 
 
-SngleTraderMarket::~SngleTraderMarket() {
+SingleTraderMarket::~SingleTraderMarket() {
 }
 
-void SngleTraderMarket::setTrader(Trader * trader) {
+void SingleTraderMarket::setTrader(Trader * trader) {
 	this->trader = trader;
 }
 
-void SngleTraderMarket::loadHistoryData(std::string path, std::vector<std::string> tickers) {
+void SingleTraderMarket::loadHistoryData(std::string path, std::vector<std::string> tickers) {
 	if (path.length() != 0 && path[path.length() - 1] != '/') {
 		path += "/";
 	}
@@ -24,7 +24,7 @@ void SngleTraderMarket::loadHistoryData(std::string path, std::vector<std::strin
 	}
 }
 
-void SngleTraderMarket::readFile(std::string path, std::string ticker) {
+void SingleTraderMarket::readFile(std::string path, std::string ticker) {
 	std::ifstream input(path);
 	if (!input.is_open()) {
 		throw std::invalid_argument("Wrong path");
@@ -68,22 +68,22 @@ void SngleTraderMarket::readFile(std::string path, std::string ticker) {
 	input.close();
 }
 
-void SngleTraderMarket::runFullTest() {
+void SingleTraderMarket::runFullTest() {
 	for (currentTick = 0; currentTick < numberOfTics; currentTick++) {
 		tick();
 	}
 }
 
-void SngleTraderMarket::addOrder(Order order) {
+void SingleTraderMarket::addOrder(Order order) {
 	ordersToAdd.push_back(order);
 }
 
-void SngleTraderMarket::changeOrder(Order order) {
+void SingleTraderMarket::changeOrder(Order order) {
 	auto changes = depths[order.ticker].changeOrder(order);
 	addToChangesToSend(changes);
 }
 
-void SngleTraderMarket::tick() {
+void SingleTraderMarket::tick() {
 	this->updateDepths();
 	this->addAndCleanOrders();
 	this->updatePortfolio();
@@ -91,7 +91,7 @@ void SngleTraderMarket::tick() {
 	this->sendAndCleanCandles();
 }
 
-void SngleTraderMarket::updateDepths() {
+void SingleTraderMarket::updateDepths() {
 	for (auto ticker : tickers) {
 		clearDepthFromHistoryOrders(ticker);
 		auto currentCandle = historyData[ticker][currentTick];
@@ -104,11 +104,11 @@ void SngleTraderMarket::updateDepths() {
 	}
 }
 
-void  SngleTraderMarket::clearDepthFromHistoryOrders(std::string ticker) {
+void  SingleTraderMarket::clearDepthFromHistoryOrders(std::string ticker) {
 	depths[ticker].clearHistoryOrders();
 }
 
-void SngleTraderMarket::updatePortfolio() {
+void SingleTraderMarket::updatePortfolio() {
 	for (OrderChange change : changesToSend) {
 		portfolio[change.ticker] += (-change.volumeChange);
 		portfolio["money"] += (change.volumeChange * change.matchPrice
@@ -116,7 +116,7 @@ void SngleTraderMarket::updatePortfolio() {
 	}
 }
 
-void SngleTraderMarket::addAndCleanOrders() {
+void SingleTraderMarket::addAndCleanOrders() {
 	for (Order order : this->ordersToAdd) {
 		auto desiderDepth = this->depths.find(order.ticker);
 		auto changes = desiderDepth->second.addOrder(order);	
@@ -125,12 +125,12 @@ void SngleTraderMarket::addAndCleanOrders() {
 	ordersToAdd.clear();
 }
 
-void SngleTraderMarket::sendAndCleanTickData() {
+void SingleTraderMarket::sendAndCleanTickData() {
 	this->trader->recieveTickData(changesToSend, anonimousDepths);
 	changesToSend.clear();
 }
 
-void SngleTraderMarket::sendAndCleanCandles() {
+void SingleTraderMarket::sendAndCleanCandles() {
 	for (auto ticker : tickers) {
 		if (candelsToSend[ticker].size() > 0) {
 			this->trader->recieveCandels(ticker, candelsToSend[ticker]);
@@ -140,7 +140,7 @@ void SngleTraderMarket::sendAndCleanCandles() {
 }
 
 
-void SngleTraderMarket::requestCandles(std::string ticker, int length) {
+void SingleTraderMarket::requestCandles(std::string ticker, int length) {
 	// additional +1 for not including begin and including end
 	int begin = max(0, currentTick + 1 - length + 1);
 	int end = min(numberOfTics, currentTick + 1 + 1);
@@ -148,18 +148,18 @@ void SngleTraderMarket::requestCandles(std::string ticker, int length) {
 											 historyData[ticker].begin() + end);
 }
 
-void SngleTraderMarket::addToChangesToSend(std::vector<OrderChange>& changes) {
+void SingleTraderMarket::addToChangesToSend(std::vector<OrderChange>& changes) {
 	changesToSend.insert(changesToSend.end(), changes.begin(), changes.end());
 }
 
-const CandesVectorMap & SngleTraderMarket::getInternalHistoryCandles() {
+const CandesVectorMap & SingleTraderMarket::getInternalHistoryCandles() {
 	return this->historyData;
 }
 
-const std::unordered_map<std::string, int>& SngleTraderMarket::getPortfio() {
+const std::unordered_map<std::string, int>& SingleTraderMarket::getPortfio() {
 	return this->portfolio;
 }
 
-void SngleTraderMarket::setComission(std::string ticker, int comission) {
+void SingleTraderMarket::setComission(std::string ticker, int comission) {
 	this->commissions[ticker] = comission;
 }

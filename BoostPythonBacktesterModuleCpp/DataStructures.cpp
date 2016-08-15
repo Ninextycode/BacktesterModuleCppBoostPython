@@ -52,40 +52,6 @@ bool operator==(const OrderChange & lhs, const OrderChange & rhs) {
 		lhs.volumeChange == rhs.volumeChange;
 }
 
-std::ostream &  operator<<(std::ostream & outputStream, const Order & p) {
-	outputStream << p.ticker << ", volume = " << p.volume << ", price = " << p.price;
-	return outputStream;
-}
-
-std::ostream &  operator<<(std::ostream & outputStream, const OrderChange & p) {
-	outputStream << p.ticker
-		<< ", current volume = " << p.currentVolume
-		<< ", match price = " << p.matchPrice
-		<< ", worst possible price = " << p.worstPossiblePrice
-		<< ", volume change = " << p.volumeChange
-		<< ", cause of change = " << p.reason;
-	return outputStream;
-}
-std::ostream &  operator<<(std::ostream & outputStream, const AnonimousMarketDepthItem & p) {
-	outputStream << ", volume = " << p.volume << ", price = " << p.price;
-	return outputStream;
-}
-std::ostream &  operator<<(std::ostream & outputStream, const ChangeReason & p) {
-	std::string name;
-	switch (p) {
-		case ChangeReason::Match:
-			name = "Match";
-			break;
-		case ChangeReason::Cancellation:
-			name = "Cancellation";
-			break;
-		case ChangeReason::Unknown:
-			name = "Unknown";
-			break;
-	}
-	outputStream << name;
-	return outputStream;
-}
 
 Order & Order::operator=(const Order &other) {
 	Order order;
@@ -161,4 +127,57 @@ bool operator==(const Candel & rhs, const Candel & lhs) {
 
 void Candel::setdatetime(std::string datetime) {
 	this->datetime = boost::posix_time::time_from_string(datetime);
+}
+
+std::string Candel::getdatetime() {
+	std::stringstream str;
+	str << datetime;
+	return str.str();
+}
+
+std::ostream &  operator<<(std::ostream & outputStream, const Candel & c) {
+	outputStream
+		<< "open = " << c.open
+		<< " high = " << c.high
+		<< " low = " << c.low
+		<< " close = " << c.close
+		<< " volume = " << c.volume
+		<< " datetime = " << c.datetime;
+	return outputStream;
+}
+
+
+std::ostream &  operator<<(std::ostream & outputStream, const Order & p) {
+	outputStream << p.ticker << ", volume = " << p.volume << ", price = " << p.price;
+	return outputStream;
+}
+
+std::ostream &  operator<<(std::ostream & outputStream, const OrderChange & p) {
+	outputStream << p.ticker
+		<< ", current volume = " << p.currentVolume
+		<< ", match price = " << p.matchPrice
+		<< ", worst possible price = " << p.worstPossiblePrice
+		<< ", volume change = " << p.volumeChange
+		<< ", cause of change = " << p.reason;
+	return outputStream;
+}
+std::ostream &  operator<<(std::ostream & outputStream, const AnonimousMarketDepthItem & p) {
+	outputStream << "volume = " << p.volume << ", price = " << p.price;
+	return outputStream;
+}
+std::ostream &  operator<<(std::ostream & outputStream, const ChangeReason & p) {
+	std::string name;
+	switch (p) {
+		case ChangeReason::Match:
+			name = "Match";
+			break;
+		case ChangeReason::Cancellation:
+			name = "Cancellation";
+			break;
+		case ChangeReason::Unknown:
+			name = "Unknown";
+			break;
+	}
+	outputStream << name;
+	return outputStream;
 }

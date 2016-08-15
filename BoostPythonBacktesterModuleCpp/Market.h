@@ -2,12 +2,12 @@
 
 typedef std::unordered_map<std::string, std::vector<Candel>> CandesVectorMap;
 
-class DECLSPEC SngleTraderMarket {
+class DECLSPEC SingleTraderMarket {
 public:
 	int DEPTH_LENGTH_PUBLIC = 5;
 	
-	SngleTraderMarket();
-	~SngleTraderMarket();
+	SingleTraderMarket();
+	~SingleTraderMarket();
 
 	void setTrader(Trader* trader);
 	void loadHistoryData(std::string path, std::vector<std::string> tickers);
@@ -25,9 +25,12 @@ public:
 	const std::unordered_map<std::string, int>& getPortfio();
 
 	void setComission(std::string ticker, int comission);
-private:
-	int currentTick = 0;
+
 	int numberOfTics = -1;
+	int currentTick = 0;
+private:
+
+	
 
 	void tick();
 	void updateDepths();

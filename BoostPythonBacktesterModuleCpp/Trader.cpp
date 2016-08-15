@@ -38,13 +38,22 @@ void Trader::changeOrder(Order order) {
 }
 
 
-void Trader::setMarket(SngleTraderMarket * market) {
+void Trader::setMarket(SingleTraderMarket * market) {
 	this->market = market;
 }
 
 
 Order Trader::createLimitOrder(std::string ticker, int volume, int price) {
 	return Order::Make_Limit_Order(this->identifier, ticker, volume, price);
+}
+
+Order Trader::createMarketOrder(std::string ticker, int volume) {
+	Order order = Order::Make_Limit_Order(this->identifier, ticker, volume, volume > 0?INT_MAX:0 );
+	return Order();
+}
+
+void Trader::requestCandels(std::string ticker, int length) {
+	this->market->requestCandles(ticker, length);
 }
 
 Trader::~Trader() {

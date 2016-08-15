@@ -304,7 +304,7 @@ namespace CppBacktesterUnitTest {
 				out << tofile;
 				out.close();
 			}
-			SngleTraderMarket m;
+			SingleTraderMarket m;
 			m.loadHistoryData("", { "share" });
 			auto actual = m.getInternalHistoryCandles();
 			
@@ -361,7 +361,7 @@ namespace CppBacktesterUnitTest {
 				CandesVectorMap recieved;
 			};
 
-			SngleTraderMarket* market = new SngleTraderMarket();
+			SingleTraderMarket* market = new SingleTraderMarket();
 			market->loadHistoryData("", { "share" });
 			TraderSaver* trader = new TraderSaver("Max");
 			market->setTrader(trader);
@@ -429,7 +429,7 @@ namespace CppBacktesterUnitTest {
 				}
 			};
 
-			SngleTraderMarket* market = new SngleTraderMarket();
+			SingleTraderMarket* market = new SingleTraderMarket();
 			market->loadHistoryData("", { "share" });
 			TraderBuyer* trader = new TraderBuyer("Max");
 			market->setTrader(trader);
@@ -483,7 +483,7 @@ namespace CppBacktesterUnitTest {
 				}
 			};
 
-			SngleTraderMarket* market = new SngleTraderMarket();
+			SingleTraderMarket* market = new SingleTraderMarket();
 			market->loadHistoryData("", { "share" });
 			TraderSeller* trader = new TraderSeller("Max");
 			market->setTrader(trader);
@@ -538,7 +538,7 @@ namespace CppBacktesterUnitTest {
 				AnonimousMaketDepth depth5;
 			};
 
-			SngleTraderMarket* market = new SngleTraderMarket();
+			SingleTraderMarket* market = new SingleTraderMarket();
 			market->loadHistoryData("", { "share" });
 			TraderDepthSaver* trader = new TraderDepthSaver("Max");
 			market->setTrader(trader);
