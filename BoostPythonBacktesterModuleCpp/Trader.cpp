@@ -48,8 +48,14 @@ Order Trader::createLimitOrder(std::string ticker, int volume, int price) {
 }
 
 Order Trader::createMarketOrder(std::string ticker, int volume) {
-	Order order = Order::Make_Limit_Order(this->identifier, ticker, volume, volume > 0?INT_MAX:0 );
-	return Order();
+	Order order = Order::Make_Limit_Order(this->identifier, ticker, volume, (volume > 0?INT_MAX:0) );
+	order.orderType = OrderType::marketOrder;
+	return order;
+}
+
+Order Trader::createIoCOrder(std::string ticker, int volume, int price) {
+	Order order = Order::Make_IoC_Order(this->identifier, ticker, volume, price);
+	return order;
 }
 
 void Trader::requestCandels(std::string ticker, int length) {

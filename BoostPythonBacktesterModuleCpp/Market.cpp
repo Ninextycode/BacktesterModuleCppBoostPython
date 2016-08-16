@@ -110,16 +110,19 @@ void  SingleTraderMarket::clearDepthFromHistoryOrders(std::string ticker) {
 
 void SingleTraderMarket::updatePortfolio() {
 	for (OrderChange change : changesToSend) {
-		portfolio[change.ticker] += (-change.volumeChange);
-		portfolio["money"] += (change.volumeChange * change.matchPrice
-							   - abs(change.volumeChange) * this->commissions[change.ticker]);
+		if (change.reason == ChangeReason::Matched) {
+			portfolio[change.ticker] += (-change.volumeChange);
+			portfolio["money"] += (change.volumeChange * change.matchPrice
+								   - abs(change.volumeChange) * this->commissions[change.ticker]);
+		}
 	}
 }
 
 void SingleTraderMarket::addAndCleanOrders() {
 	for (Order order : this->ordersToAdd) {
-		auto desiderDepth = this->depths.find(order.ticker);
-		auto changes = desiderDepth->second.addOrder(order);	
+		MarketDepth& desiderDepth = depths[order.ticker];
+		
+		auto changes = desiderDepth.addOrder(order);	
 		addToChangesToSend(changes);
 	}
 	ordersToAdd.clear();

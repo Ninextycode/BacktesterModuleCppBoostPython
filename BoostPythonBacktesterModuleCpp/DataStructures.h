@@ -1,7 +1,7 @@
 #pragma once
 
 enum class OrderType {
-	marketOrder, limitOrder
+	marketOrder, limitOrder, IoC
 };
 
 struct DECLSPEC Candel {
@@ -21,8 +21,9 @@ struct DECLSPEC Candel {
 };
 
 struct DECLSPEC Order {
-	static Order Make_Limit_Order(std::string trader_identifier, std::string ticker, int volume, int price);
-	
+	static Order Make_Limit_Order(std::string traderIdentifier, std::string ticker, int volume, int price);
+	static Order Make_IoC_Order(std::string traderIdentifier, std::string ticker, int volume, int price);
+
 	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream, 
 											 const Order& p);
 	friend DECLSPEC bool operator==(const Order& rhs,
@@ -33,7 +34,7 @@ struct DECLSPEC Order {
 	int price;
 	OrderType orderType;
 
-	std::string trader_identifier;
+	std::string traderIdentifier;
 	std::string ticker;
 
 	const std::string getTicker();
@@ -45,7 +46,7 @@ struct DECLSPEC Order {
 } ;
 
 enum class ChangeReason {
-	Match, Cancellation, Unknown
+	Placed, Matched, Cancelled, Unknown
 };
 
 std::ostream& operator<<(std::ostream & outputStream, const  ChangeReason & p);
@@ -55,17 +56,20 @@ struct DECLSPEC OrderChange {
 											   const Order& after, 
 											   ChangeReason reason,
 											   int matchPrice = 0);
-	static OrderChange ChangesOfOrderVanishing (const Order& order,
+	static OrderChange ChangesOfOrderVanished (const Order& order,
 												ChangeReason reason,
 												int matchPrice = 0);
 	
+	static OrderChange ChangesOfOrderPlaced(const Order& order);
+
+
 	ChangeReason reason;
 	int volumeChange;
 	int worstPossiblePrice;
 	int matchPrice = 0;
 	int currentVolume;
 	std::string ticker;
-	std::string trader_identifier;
+	std::string traderIdentifier;
 
 	friend DECLSPEC bool operator==(const OrderChange& rhs, const OrderChange& lhs);
 	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream,

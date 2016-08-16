@@ -114,8 +114,9 @@ BOOST_PYTHON_MODULE(backtester) {
 
 	//recieved changes
 	enum_<ChangeReason>("ChangeReason")
-		.value("Match", ChangeReason::Match)
-		.value("Cancellation", ChangeReason::Cancellation)
+		.value("Placed", ChangeReason::Placed)
+		.value("Matched", ChangeReason::Matched)
+		.value("Cancelled", ChangeReason::Cancelled)
 		.value("Unknown", ChangeReason::Unknown);
 
 	class_<Candel>("Candel")
@@ -142,11 +143,10 @@ BOOST_PYTHON_MODULE(backtester) {
 		.def_readwrite("current_volume", &OrderChange::currentVolume)
 		.def_readwrite("worst_possible_price", &OrderChange::worstPossiblePrice)
 		.def_readwrite("match_price", &OrderChange::matchPrice)
-		.def_readwrite("order_type", &OrderChange::reason)
+		.def_readwrite("cause", &OrderChange::reason)
 		.def_readwrite("ticker", &OrderChange::ticker)
-		.def_readwrite("trader_identifier", &OrderChange::trader_identifier)
-
-		.def_readwrite("ticker", &OrderChange::ticker)
+		.def_readwrite("trader_identifier", &OrderChange::traderIdentifier)
+		.def_readwrite("volume_change", &OrderChange::volumeChange)
 		.def(self == self)
 		.def(self_ns::str(self_ns::self))
 		.def(self_ns::repr(self_ns::self));
@@ -156,7 +156,7 @@ BOOST_PYTHON_MODULE(backtester) {
 		.def_readwrite("price", &Order::price)
 		.def_readwrite("orderType", &Order::orderType)
 
-		.def_readwrite("trader_identifier", &Order::trader_identifier)
+		.def_readwrite("trader_identifier", &Order::traderIdentifier)
 
 		.def_readwrite("ticker", &Order::ticker)
 

@@ -27,6 +27,7 @@ public:
 	
 	Order createLimitOrder(std::string ticker, int volume, int price);
 	Order createMarketOrder(std::string ticker, int volume);
+	Order createIoCOrder(std::string ticker, int volume, int price);
 	std::unordered_map<std::string, std::unordered_map<int, int>> orders;
 protected:
 	

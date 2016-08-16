@@ -2,7 +2,7 @@
 #include "Backtester.h"
 
 
-Order Order::Make_Limit_Order(std::string trader_identifier, std::string ticker, int volume, int price) {
+Order Order::Make_Limit_Order(std::string traderIdentifier, std::string ticker, int volume, int price) {
 	Order o;
 	o.orderType = OrderType::limitOrder;
 	o.volume = volume;
@@ -10,7 +10,19 @@ Order Order::Make_Limit_Order(std::string trader_identifier, std::string ticker,
 
 	o.ticker = std::string(ticker);
 
-	o.trader_identifier = std::string(trader_identifier);
+	o.traderIdentifier = std::string(traderIdentifier);
+	return o;
+}
+
+Order Order::Make_IoC_Order(std::string traderIdentifier, std::string ticker, int volume, int price) {
+	Order o;
+	o.orderType = OrderType::IoC;
+	o.volume = volume;
+	o.price = price;
+
+	o.ticker = std::string(ticker);
+
+	o.traderIdentifier = std::string(traderIdentifier);
 	return o;
 }
 
@@ -22,7 +34,7 @@ Order::Order(const Order & order) {
 	this->orderType = order.orderType;
 	this->price = order.price;
 	this->ticker = std::string(order.ticker);
-	this->trader_identifier = std::string(order.trader_identifier);
+	this->traderIdentifier = std::string(order.traderIdentifier);
 	this->volume = order.volume;
 }
 
@@ -38,7 +50,7 @@ bool operator==(const Order & lhs, const Order & rhs) {
 		lhs.volume == rhs.volume &&
 
 		lhs.ticker == rhs.ticker &&
-		lhs.trader_identifier == rhs.trader_identifier;
+		lhs.traderIdentifier == rhs.traderIdentifier;
 }
 
 bool operator==(const OrderChange & lhs, const OrderChange & rhs) {
@@ -48,7 +60,7 @@ bool operator==(const OrderChange & lhs, const OrderChange & rhs) {
 		lhs.reason == rhs.reason &&
 
 		lhs.ticker == rhs.ticker &&
-		lhs.trader_identifier == rhs.trader_identifier &&
+		lhs.traderIdentifier == rhs.traderIdentifier &&
 		lhs.volumeChange == rhs.volumeChange;
 }
 
@@ -59,8 +71,8 @@ Order & Order::operator=(const Order &other) {
 	order.volume = other.volume;
 	order.price = other.price;
 	order.ticker = std::string(other.ticker);
-	order.trader_identifier =
-		std::string(other.trader_identifier);
+	order.traderIdentifier =
+		std::string(other.traderIdentifier);
 
 	return order;
 }
@@ -79,7 +91,7 @@ OrderChange OrderChange::MakeChangesByComparison (const Order & initial,
 	change.volumeChange = after.volume - initial.volume;
 	change.currentVolume = after.volume;
 	change.ticker = after.ticker;
-	change.trader_identifier = after.trader_identifier;
+	change.traderIdentifier = after.traderIdentifier;
 	change.reason = reason;
 	change.worstPossiblePrice = after.price;
 	change.matchPrice = matchPrice;
@@ -87,7 +99,7 @@ OrderChange OrderChange::MakeChangesByComparison (const Order & initial,
 	return change;
 }
 
-OrderChange OrderChange::ChangesOfOrderVanishing (const Order & order,
+OrderChange OrderChange::ChangesOfOrderVanished (const Order & order,
 												  ChangeReason reason,
 												  int matchPrice) {
 	OrderChange change;
@@ -95,10 +107,24 @@ OrderChange OrderChange::ChangesOfOrderVanishing (const Order & order,
 	change.volumeChange = -order.volume;
 	change.currentVolume = 0;
 	change.ticker = order.ticker;
-	change.trader_identifier = order.trader_identifier;
+	change.traderIdentifier = order.traderIdentifier;
 	change.reason = reason;
 	change.worstPossiblePrice = order.price;
 	change.matchPrice = matchPrice;
+
+	return change;
+}
+
+OrderChange OrderChange::ChangesOfOrderPlaced(const Order & order) {
+	OrderChange change;
+
+	change.volumeChange = order.volume;
+	change.currentVolume = order.volume;
+	change.ticker = order.ticker;
+	change.traderIdentifier = order.traderIdentifier;
+	change.reason = ChangeReason::Placed;
+	change.worstPossiblePrice = order.price;
+	change.matchPrice = 0;
 
 	return change;
 }
@@ -148,12 +174,12 @@ std::ostream &  operator<<(std::ostream & outputStream, const Candel & c) {
 
 
 std::ostream &  operator<<(std::ostream & outputStream, const Order & p) {
-	outputStream << p.ticker << ", volume = " << p.volume << ", price = " << p.price;
+	outputStream << p.ticker << ", trader " << p.traderIdentifier << ", volume = " << p.volume << ", price = " << p.price;
 	return outputStream;
 }
 
 std::ostream &  operator<<(std::ostream & outputStream, const OrderChange & p) {
-	outputStream << p.ticker
+	outputStream << p.ticker << "trader "<<  p.traderIdentifier
 		<< ", current volume = " << p.currentVolume
 		<< ", match price = " << p.matchPrice
 		<< ", worst possible price = " << p.worstPossiblePrice
@@ -168,11 +194,14 @@ std::ostream &  operator<<(std::ostream & outputStream, const AnonimousMarketDep
 std::ostream &  operator<<(std::ostream & outputStream, const ChangeReason & p) {
 	std::string name;
 	switch (p) {
-		case ChangeReason::Match:
-			name = "Match";
+		case ChangeReason::Matched:
+			name = "Matched";
 			break;
-		case ChangeReason::Cancellation:
-			name = "Cancellation";
+		case ChangeReason::Cancelled:
+			name = "Cancelled";
+			break;
+		case ChangeReason::Placed:
+			name = "Placed";
 			break;
 		case ChangeReason::Unknown:
 			name = "Unknown";

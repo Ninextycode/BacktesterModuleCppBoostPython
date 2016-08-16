@@ -4,7 +4,7 @@ typedef std::unordered_map<std::string, std::vector<Candel>> CandesVectorMap;
 
 class DECLSPEC SingleTraderMarket {
 public:
-	int DEPTH_LENGTH_PUBLIC = 5;
+	int DEPTH_LENGTH_PUBLIC = 20;
 	
 	SingleTraderMarket();
 	~SingleTraderMarket();

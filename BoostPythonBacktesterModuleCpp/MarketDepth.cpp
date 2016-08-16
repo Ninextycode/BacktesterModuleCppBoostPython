@@ -13,18 +13,22 @@ MarketDepth::~MarketDepth() {
 
 std::vector<OrderChange> MarketDepth::addOrder(Order order) {
 	currentChanges.clear();
+	addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderPlaced(order));
+
 	tryMatchOrder(order);
-	if (order.volume != 0) {
+	if (order.orderType != OrderType::IoC && order.volume != 0) {
 		auto it_whereOrdersWithSuchPrice = this->totalDepth.find(order.price);
 		if (it_whereOrdersWithSuchPrice == this->totalDepth.end()) {
 			(this->totalDepth)[order.price] = { order };
 		} else {
-			if (order.trader_identifier == OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
+			if (order.traderIdentifier == OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
 				it_whereOrdersWithSuchPrice->second.push_back(order); //Deprioritise history orders
 			} else {
 				it_whereOrdersWithSuchPrice->second.push_front(order);
 			}
 		}
+	} else if (order.orderType == OrderType::IoC) {
+		currentChanges.push_back(OrderChange::ChangesOfOrderVanished(order, ChangeReason::Cancelled));
 	}
 	return currentChanges;
 }
@@ -77,24 +81,24 @@ void MarketDepth::tryMatchOrderWithExactPriceOrders(Order& order, int price) {
 	for (auto it = orderList.begin(); it != orderList.end(); /* "it" is incrementing */) {
 		if (abs(order.volume) >= abs(it->volume)) { //Vanishing of order already being inside depth
 
-			addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanishing(*it, ChangeReason::Match, it->price));
+			addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanished(*it, ChangeReason::Matched, it->price));
 
 			Order oldOrder = order;
 			order.volume += it->volume;
 
-			addChangeIfItIsNotHistory(OrderChange::MakeChangesByComparison(oldOrder, order, ChangeReason::Match, it->price));
+			addChangeIfItIsNotHistory(OrderChange::MakeChangesByComparison(oldOrder, order, ChangeReason::Matched, it->price));
 			
 			
 			it = orderList.erase(it); // <-- here incrementation
 		} else {  //Vanishing of newly recieved order
 
-			addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanishing(order, ChangeReason::Match, it->price));
+			addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanished(order, ChangeReason::Matched, it->price));
 			
 			Order oldOrder = *it;
 			it->volume += order.volume;
 			order.volume = 0;
 
-			addChangeIfItIsNotHistory(OrderChange::MakeChangesByComparison(oldOrder, *it, ChangeReason::Match, it->price));
+			addChangeIfItIsNotHistory(OrderChange::MakeChangesByComparison(oldOrder, *it, ChangeReason::Matched, it->price));
 					
 			break;
 		}
@@ -105,7 +109,7 @@ void MarketDepth::tryMatchOrderWithExactPriceOrders(Order& order, int price) {
 }
 
 void MarketDepth::addChangeIfItIsNotHistory(OrderChange change) {
-	if (change.trader_identifier != OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
+	if (change.traderIdentifier != OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
 		this->currentChanges.
 			push_back(change);
 	}
@@ -130,9 +134,9 @@ void MarketDepth::removeOrdersOfSuchTraderWithSuchPrice(Order newOrder) {
 	if (it_whereOrdersWithSuchPrice != this->totalDepth.end()) {
 		std::list<Order>& orderList = it_whereOrdersWithSuchPrice->second;
 		for (auto it = orderList.begin(); it != orderList.end(); ) {
-			if (it->trader_identifier == newOrder.trader_identifier) {
+			if (it->traderIdentifier == newOrder.traderIdentifier) {
 
-				addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanishing(*it, ChangeReason::Cancellation));
+				addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanished(*it, ChangeReason::Cancelled));
 
 				it = orderList.erase(it);
 
@@ -183,7 +187,7 @@ void MarketDepth::clearHistoryOrders() {
 	for (int price : prices) {
 		std::list<Order>& orderList = totalDepth[price];
 		for (auto it = orderList.begin(); it != orderList.end(); ) {
-			if (it->trader_identifier == OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
+			if (it->traderIdentifier == OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
 				it = orderList.erase(it);
 			} else {
 				it++;

@@ -17,25 +17,65 @@ namespace Microsoft {
 			
 			template<> static wstring ToString<unordered_map<string, int>>
 				(const unordered_map<string, int>& d) {
-				return L"Wrong portfolio";
+				stringstream message;
+				message << "map: string-ins\n";
+				for (auto it = d.begin(); it != d.end(); it++) {
+					message << it->first << " " << it->second << "\n";
+				}
+				auto s = message.str();
+				auto w_message = wstring(s.begin(), s.end());
+
+				return w_message;
 			}
+
 			template<> static wstring ToString<AnonimousMaketDepth>
 				(const AnonimousMaketDepth& d) {
-				return L"Wrong Anonimous Depth";
+				stringstream message;
+				message << "AnonimousMaketDepth: \n";
+				for (auto it = d.begin(); it != d.end(); it++) {
+					message << *it << "\n";
+				}
+				auto s = message.str();
+				auto w_message = wstring(s.begin(), s.end());
+
+				return w_message;
 			}
+
 			template<> static wstring ToString<vector<Order>>
 				(const vector<Order>& d) {
-				return L"Wrong vector of orders";
+				stringstream message;
+				message << "Vector of orders\n";
+				for (auto it = d.begin(); it != d.end(); it++) {
+					message << *it << "\n";
+				}
+				auto s = message.str();
+				auto w_message = wstring(s.begin(), s.end());
+
+				return w_message;
 			}
+
 			template<> static wstring ToString<CandesVectorMap>
 				(const CandesVectorMap& d) {
-				return L"Wrong CandesVectorMap";
+				stringstream message;
+				message << "map: string - vector of candles\n";
+				for (auto it = d.begin(); it != d.end(); it++) {
+					message << it->first << " : ";
+					for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+						message << (*it2) << " |";
+					}
+					message << "\n";
+				}
+				auto s = message.str();
+				auto w_message = wstring(s.begin(), s.end());
+
+				return w_message;
 			}
+
+
 			template<> static wstring ToString<MarketDepthData>
 				(const MarketDepthData& d) {
-
 				stringstream message;
-				message << "\n";
+				message << "MarketDepthData\n";
 				for (auto it = d.begin(); it != d.end(); it++) {
 					message << it->first << " : ";
 					for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
@@ -52,7 +92,15 @@ namespace Microsoft {
 
 			template<> static wstring ToString<vector<OrderChange>>
 				(const vector<OrderChange>& d) {
-				return L"Wrong Changes Track";
+				stringstream message;
+				message << "vector of OrderChange\n";
+				for (auto it = d.begin(); it != d.end(); it++) {
+					message << *it << "\n";
+				}
+				auto s = message.str();
+				auto w_message = wstring(s.begin(), s.end());
+
+				return w_message;
 			}
 		}
 	}
@@ -194,34 +242,58 @@ namespace CppBacktesterUnitTest {
 		TEST_METHOD(MatchingOrders_OrderChangerReport) {
 			MarketDepth m("s1");
 			Order first_order = Order::Make_Limit_Order("Fin", "share", 10, 10);
-			m.addOrder(first_order);
+			auto changes = m.addOrder(first_order);
 
 			Order second_order = Order::Make_Limit_Order("Stan", "share", -10, 5);
-
-			auto changes = m.addOrder(second_order);
-			OrderChange finChange;
+			auto changes2 = m.addOrder(second_order);
+			changes.insert(changes.end(), changes2.begin(), changes2.end());
 			
-			finChange.currentVolume = 0;
-			finChange.worstPossiblePrice = 10;
-			finChange.reason = ChangeReason::Match;
-			finChange.ticker = "share";
-			finChange.trader_identifier = "Fin";
-			finChange.volumeChange = -10;
-			finChange.matchPrice = 10;
-
-			OrderChange stanChange;
-
-			stanChange.currentVolume = 0;
-			stanChange.worstPossiblePrice = 5;
-			stanChange.reason = ChangeReason::Match;
-			stanChange.ticker = "share";
-			stanChange.trader_identifier = "Stan";
-			stanChange.volumeChange = 10;
-			finChange.matchPrice = 10;
-
-			vector<OrderChange> expected_changes = { finChange , stanChange };
+			vector<OrderChange> expectedChanges;
 			
-			Assert::AreEqual(expected_changes, changes);
+			OrderChange change;
+			change.volumeChange = 10;
+			change.currentVolume = 10;
+			change.ticker = "share";
+			change.traderIdentifier = "Fin";
+			change.reason = ChangeReason::Placed;
+			change.worstPossiblePrice = 10;
+			change.matchPrice = 0;
+
+			expectedChanges.push_back(change);  
+
+			change.volumeChange = -10;
+			change.currentVolume = -10;
+			change.ticker = "share";
+			change.traderIdentifier = "Stan";
+			change.reason = ChangeReason::Placed;
+			change.worstPossiblePrice = 5;
+			change.matchPrice = 0;
+			expectedChanges.push_back(change); 		
+
+			
+			change.currentVolume = 0;
+			change.worstPossiblePrice = 10;
+			change.reason = ChangeReason::Matched;
+			change.ticker = "share";
+			change.traderIdentifier = "Fin";
+			change.volumeChange = -10;
+			change.matchPrice = 10;
+			expectedChanges.push_back(change);
+
+
+
+			change.currentVolume = 0;
+			change.worstPossiblePrice = 5;
+			change.reason = ChangeReason::Matched;
+			change.ticker = "share";
+			change.traderIdentifier = "Stan";
+			change.volumeChange = 10;
+			change.matchPrice = 10;
+			expectedChanges.push_back(change);
+
+
+			
+			Assert::AreEqual(expectedChanges, changes);
 		}
 
 		TEST_METHOD(MatchingOrders_OrderCancelReport) {
@@ -235,9 +307,9 @@ namespace CppBacktesterUnitTest {
 
 			change.currentVolume = 0;
 			change.worstPossiblePrice = 11;
-			change.reason = ChangeReason::Cancellation;
+			change.reason = ChangeReason::Cancelled;
 			change.ticker = "share";
-			change.trader_identifier = "Max";
+			change.traderIdentifier = "Max";
 			change.volumeChange = 10;
 
 			vector<OrderChange> expected_changes = { change };
@@ -549,16 +621,47 @@ namespace CppBacktesterUnitTest {
 
 			AnonimousMaketDepth expectedDepth =
 			{
-				{ 5, 55},
-				{ 5, 56 }, 
-				{ 5, 57}, 
-				{ 5, 58 }, 
-				{ 5, 59 }, 
-				{ -5, 61 }, 
-				{ -5, 62 }, 
-				{ -5, 63 }, 
-				{ -5, 64 }, 
-				{ -5, 65 }, 
+				{ 10, 40 },
+				{ 10, 41 },
+				{ 10, 42 },
+				{ 10, 43 },
+				{ 10, 44 },
+				{ 10, 45 },
+				{ 10, 46 },
+				{ 10, 47 },
+				{ 10, 48 },
+				{ 10, 49 },
+				{ 10, 50 },
+				{ 10, 51 },
+				{ 10, 52 },
+				{ 10, 53 },
+				{ 10, 54 },
+				{ 10, 55},
+				{ 10, 56 }, 
+				{ 10, 57}, 
+				{ 10, 58 }, 
+				{ 10, 59 }, 
+
+				{ -10, 61 }, 
+				{ -10, 62 }, 
+				{ -10, 63 }, 
+				{ -10, 64 }, 
+				{ -10, 65 }, 
+				{ -10, 66 },
+				{ -10, 67 },
+				{ -10, 68 },
+				{ -10, 69 },
+				{ -10, 70 },
+				{ -10, 71 },
+				{ -10, 72 },
+				{ -10, 73 },
+				{ -10, 74 },
+				{ -10, 75 },
+				{ -10, 76 },
+				{ -10, 77 },
+				{ -10, 78 },
+				{ -10, 79 },
+				{ -10, 80 },
 			};
 
 			auto actualDepth = trader->depth5;
@@ -566,6 +669,82 @@ namespace CppBacktesterUnitTest {
 
 			delete market;
 			delete trader;
+		}
+
+		TEST_METHOD(ImmOrCancelOrder) {
+			MarketDepth m("s1");
+
+			vector<Order> orders;
+			orders.push_back(Order::Make_Limit_Order("history", "share", 1, 1));
+			orders.push_back(Order::Make_Limit_Order("history", "share", 1, 2));
+			orders.push_back(Order::Make_Limit_Order("history", "share", 1, 3));
+			orders.push_back(Order::Make_Limit_Order("history", "share", 1, 4));
+			orders.push_back(Order::Make_Limit_Order("history", "share", 1, 5));
+			orders.push_back(Order::Make_Limit_Order("history", "share", 1, 5));
+
+			for (Order o : orders) {
+				m.addOrder(o);
+			}
+
+			vector<OrderChange> actualChanges = m.addOrder(Order::Make_IoC_Order("Max", "share", -10, 4));
+
+			vector<OrderChange> expectedChanges;
+
+			OrderChange change;
+			change.volumeChange = -10;
+			change.currentVolume = -10;
+			change.ticker = "share";
+			change.traderIdentifier = "Max";
+			change.reason = ChangeReason::Placed;
+			change.worstPossiblePrice = 4;
+			change.matchPrice = 0;
+
+			expectedChanges.push_back(change);  //add
+		
+			change.volumeChange = 1;
+			change.currentVolume = -9;
+			change.reason = ChangeReason::Matched;
+			change.worstPossiblePrice = 4;
+			change.matchPrice = 5;
+
+			expectedChanges.push_back(change); //match 1st 5
+
+
+			change.volumeChange = 1;
+			change.currentVolume = -8;
+			change.reason = ChangeReason::Matched;
+			change.worstPossiblePrice = 4;
+			change.matchPrice = 5;
+
+			expectedChanges.push_back(change); //match 2nd 5
+
+			change.volumeChange = 1;
+			change.currentVolume = -7;
+			change.reason = ChangeReason::Matched;
+			change.worstPossiblePrice = 4;
+			change.matchPrice = 4;
+
+			expectedChanges.push_back(change); //match 4
+
+
+			change.volumeChange = 7;
+			change.currentVolume = 0;
+			change.reason = ChangeReason::Cancelled;
+			change.worstPossiblePrice = 4;
+			change.matchPrice = 0;
+
+			expectedChanges.push_back(change); //cancelled
+
+			MarketDepthData actuaDepth = m.getInternalDepth();
+
+			MarketDepthData expectedDepth{
+				{ 1 ,{ Order::Make_Limit_Order("history", "share", 1, 1) } },
+				{ 2 ,{ Order::Make_Limit_Order("history", "share", 1, 2) } },
+				{ 3, { Order::Make_Limit_Order("history", "share", 1, 3) } }
+			};
+
+			Assert::AreEqual(expectedDepth, actuaDepth);
+			Assert::AreEqual(expectedChanges, actualChanges);
 		}
 
 	private:
