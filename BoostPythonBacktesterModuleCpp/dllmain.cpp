@@ -176,10 +176,11 @@ BOOST_PYTHON_MODULE(backtester) {
 		.def("set_comission", &SingleTraderMarket::setComission)
 		.def_readwrite("DEPTH_LENGTH_PUBLIC", &SingleTraderMarket::DEPTH_LENGTH_PUBLIC)
 		.def_readonly("DEPTH_LENGTH_PUBLIC", &SingleTraderMarket::DEPTH_LENGTH_PUBLIC)
+		.def_readonly("number_of_tics", &SingleTraderMarket::numberOfTics)
 		.def("get_internal_history_candles", &SingleTraderMarket::getInternalHistoryCandles,
 					   return_value_policy<copy_const_reference>());
 
-	class_<TraderWrap, boost::noncopyable>("Trader", init<string>(args("identifier")))		
+	class_<TraderWrap, boost::noncopyable>("Trader", init<string>(args("identifier")))
 		.def("tick_action", pure_virtual(&Trader::newTickAction))
 		.def("new_candels_action", pure_virtual(&Trader::newCandelsAction))
 

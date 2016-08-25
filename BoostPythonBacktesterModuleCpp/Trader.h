@@ -25,6 +25,7 @@ public:
 
 	const std::unordered_map<std::string, int>& getPortfio();
 	
+
 	Order createLimitOrder(std::string ticker, int volume, int price);
 	Order createMarketOrder(std::string ticker, int volume);
 	Order createIoCOrder(std::string ticker, int volume, int price);
