@@ -21,7 +21,7 @@ std::vector<OrderChange> MarketDepth::addOrder(Order order) {
 		if (it_whereOrdersWithSuchPrice == this->totalDepth.end()) {
 			(this->totalDepth)[order.price] = { order };
 		} else {
-			if (order.traderIdentifier == OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
+			if (order.traderIdentifier == OrdersFromCandleBuilder::HISTORY_IDENTIFIER) {
 				it_whereOrdersWithSuchPrice->second.push_back(order); //Deprioritise history orders
 			} else {
 				it_whereOrdersWithSuchPrice->second.push_front(order);
@@ -109,7 +109,7 @@ void MarketDepth::tryMatchOrderWithExactPriceOrders(Order& order, int price) {
 }
 
 void MarketDepth::addChangeIfItIsNotHistory(OrderChange change) {
-	if (change.traderIdentifier != OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
+	if (change.traderIdentifier != OrdersFromCandleBuilder::HISTORY_IDENTIFIER) {
 		this->currentChanges.
 			push_back(change);
 	}
@@ -187,7 +187,7 @@ void MarketDepth::clearHistoryOrders() {
 	for (int price : prices) {
 		std::list<Order>& orderList = totalDepth[price];
 		for (auto it = orderList.begin(); it != orderList.end(); ) {
-			if (it->traderIdentifier == OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
+			if (it->traderIdentifier == OrdersFromCandleBuilder::HISTORY_IDENTIFIER) {
 				it = orderList.erase(it);
 			} else {
 				it++;

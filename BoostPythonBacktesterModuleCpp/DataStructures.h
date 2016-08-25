@@ -4,7 +4,7 @@ enum class OrderType {
 	marketOrder, limitOrder, IoC
 };
 
-struct DECLSPEC Candel {
+struct DECLSPEC Candle {
 	int open;
 	int high;
 	int low;
@@ -14,10 +14,10 @@ struct DECLSPEC Candel {
 
 	void setdatetime(std::string datetime);
 	std::string getdatetime();
-	friend DECLSPEC bool operator==(const Candel& rhs,
-									const Candel& lhs);
+	friend DECLSPEC bool operator==(const Candle& rhs,
+									const Candle& lhs);
 	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream,
-											 const Candel& p);
+											 const Candle& p);
 };
 
 struct DECLSPEC Order {

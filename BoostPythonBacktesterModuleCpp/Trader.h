@@ -14,17 +14,18 @@ public:
 	void recieveTickData(std::vector<OrderChange> matcher, 
 						 std::unordered_map<std::string, AnonimousMaketDepth> depths);
 
-	virtual void newCandelsAction(std::string ticker, std::vector<Candel> candels) = 0;
+	virtual void newCandlesAction(std::string ticker, std::vector<Candle> candles) = 0;
 
-	void recieveCandels(std::string ticker, std::vector<Candel> candels);
+	void recieveCandles(std::string ticker, std::vector<Candle> candles);
 
 	void setMarket(SingleTraderMarket* market);
 	void changeOrder(Order order);
 	void makeOrder(Order order);
-	void requestCandels(std::string ticker, int length);
+	void requestCandles(std::string ticker, int length);
 
 	const std::unordered_map<std::string, int>& getPortfio();
-	
+	const std::unordered_map<std::string, std::vector<float>>& getPerformance();
+
 
 	Order createLimitOrder(std::string ticker, int volume, int price);
 	Order createMarketOrder(std::string ticker, int volume);

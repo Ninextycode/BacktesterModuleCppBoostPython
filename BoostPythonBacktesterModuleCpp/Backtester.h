@@ -21,4 +21,4 @@
 #include "Trader.h"
 #include "Market.h"
 
-#include "OrdersFromCandelBuilder.h"
+#include "OrdersFromCandleBuilder.h"

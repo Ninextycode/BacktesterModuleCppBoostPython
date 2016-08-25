@@ -3,7 +3,7 @@
 
 
 Trader::Trader(std::string identifier) {
-	if (identifier == OrdersFromCandelBuilder::HISTORY_IDENTIFIER) {
+	if (identifier == OrdersFromCandleBuilder::HISTORY_IDENTIFIER) {
 		identifier += "_";
 	}
 	this->identifier = identifier;
@@ -21,8 +21,8 @@ void Trader::recieveTickData(std::vector<OrderChange> changes,
 	this->newTickAction(changes, depth);
 }
 
-void Trader::recieveCandels(std::string ticker, std::vector<Candel> candels) {
-	this->newCandelsAction(ticker, candels);
+void Trader::recieveCandles(std::string ticker, std::vector<Candle> candles) {
+	this->newCandlesAction(ticker, candles);
 }
 
 void Trader::makeOrder(Order order) {
@@ -31,6 +31,10 @@ void Trader::makeOrder(Order order) {
 
 const std::unordered_map<std::string, int>& Trader::getPortfio() {
 	return this->market->getPortfio();
+}
+
+const std::unordered_map<std::string, std::vector<float>>& Trader::getPerformance() {
+	return this->market->getPerformance();
 }
 
 void Trader::changeOrder(Order order) {
@@ -58,7 +62,7 @@ Order Trader::createIoCOrder(std::string ticker, int volume, int price) {
 	return order;
 }
 
-void Trader::requestCandels(std::string ticker, int length) {
+void Trader::requestCandles(std::string ticker, int length) {
 	this->market->requestCandles(ticker, length);
 }
 

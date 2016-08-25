@@ -39,7 +39,7 @@
     <ClInclude Include="Market.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OrdersFromCandelBuilder.h">
+    <ClInclude Include="OrdersFromCandleBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

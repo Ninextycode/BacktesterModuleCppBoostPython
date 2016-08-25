@@ -198,10 +198,10 @@ namespace CppBacktesterUnitTest {
 			Assert::AreEqual(expectedDepth, m.getInternalDepth());
 		}
 
-		//Cannot export OrdersFromCandelBuilder. Uncommented won't compile
-		/*TEST_METHOD(OrdersFromCandelBuilder) {
+		//Cannot export OrdersFromCandleBuilder. Uncommented won't compile
+		/*TEST_METHOD(OrdersFromCandleBuilder) {
 
-			Candel c;
+			Candle c;
 			c.open = 1;
 			c.high = 2;
 			c.low = 3;
@@ -209,7 +209,7 @@ namespace CppBacktesterUnitTest {
 			c.volume = 5;
 			c.datetime = boost::posix_time::time_from_string("1998-08-07 10:00:00");
 
-			vector<Order> actual = OrdersFromCandelBuilder::ordersFromCandel(c, "share", 10, 2);
+			vector<Order> actual = OrdersFromCandleBuilder::ordersFromCandle(c, "share", 10, 2);
 
 
 			vector<Order> ecpected{
@@ -322,7 +322,7 @@ namespace CppBacktesterUnitTest {
 			MarketDepth m("s1");
 			
 			Order notHistoryOrder = Order::Make_Limit_Order("Max", "share", 1, 1);
-			//check that OrdersFromCandelBuilder::HISTORY_IDENTIFIER == history
+			//check that OrdersFromCandleBuilder::HISTORY_IDENTIFIER == history
 			Order historyOrder = 
 				Order::Make_Limit_Order("history", "share", 1, 1);
 
@@ -380,7 +380,7 @@ namespace CppBacktesterUnitTest {
 			m.loadHistoryData("", { "share" });
 			auto actual = m.getInternalHistoryCandles();
 			
-			Candel c;
+			Candle c;
 			c.open = 1;
 			c.high = 2;
 			c.low = 3;
@@ -427,8 +427,8 @@ namespace CppBacktesterUnitTest {
 					}
 					tick++;
 				}
-				void newCandelsAction(std::string ticker, std::vector<Candel> candels) override {
-					recieved[ticker] = candels;
+				void newCandlesAction(std::string ticker, std::vector<Candle> candles) override {
+					recieved[ticker] = candles;
 				}
 				CandesVectorMap recieved;
 			};
@@ -442,7 +442,7 @@ namespace CppBacktesterUnitTest {
 
 			market->runFullTest();
 
-			Candel c;
+			Candle c;
 			c.open = 1;
 			c.high = 2;
 			c.low = 3;
@@ -496,7 +496,7 @@ namespace CppBacktesterUnitTest {
 					}
 					tick++;
 				}
-				void newCandelsAction(std::string ticker, std::vector<Candel> candels) {
+				void newCandlesAction(std::string ticker, std::vector<Candle> candles) {
 
 				}
 			};
@@ -550,7 +550,7 @@ namespace CppBacktesterUnitTest {
 					}
 					tick++;
 				}
-				void newCandelsAction(std::string ticker, std::vector<Candel> candels) {
+				void newCandlesAction(std::string ticker, std::vector<Candle> candles) {
 
 				}
 			};
@@ -604,7 +604,7 @@ namespace CppBacktesterUnitTest {
 					}
 					tick++;
 				}
-				void newCandelsAction(std::string ticker, std::vector<Candel> candels) {
+				void newCandlesAction(std::string ticker, std::vector<Candle> candles) {
 
 				}
 				AnonimousMaketDepth depth5;

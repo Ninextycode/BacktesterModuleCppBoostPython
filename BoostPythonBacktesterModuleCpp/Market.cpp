@@ -51,7 +51,7 @@ void SingleTraderMarket::readFile(std::string path, std::string ticker) {
 			continue;
 		}
 
-		Candel c;
+		Candle c;
 		c.open = stoi(open);
 		c.high = stoi(high);
 		c.low = stoi(low);
@@ -68,7 +68,16 @@ void SingleTraderMarket::readFile(std::string path, std::string ticker) {
 	input.close();
 }
 
+void SingleTraderMarket::preparePerformance() {
+	for (auto ticker : tickers) {
+		performance[ticker].reserve(numberOfTics);
+	}
+	performance["money"].reserve(numberOfTics);
+	performance["lv"].reserve(numberOfTics);
+}
+
 void SingleTraderMarket::runFullTest() {
+	preparePerformance();
 	for (currentTick = 0; currentTick < numberOfTics; currentTick++) {
 		tick();
 	}
@@ -87,6 +96,7 @@ void SingleTraderMarket::tick() {
 	this->updateDepths();
 	this->addAndCleanOrders();
 	this->updatePortfolio();
+	this->addToPerformance();
 	this->sendAndCleanTickData();
 	this->sendAndCleanCandles();
 }
@@ -95,7 +105,7 @@ void SingleTraderMarket::updateDepths() {
 	for (auto ticker : tickers) {
 		clearDepthFromHistoryOrders(ticker);
 		auto currentCandle = historyData[ticker][currentTick];
-		auto orders = OrdersFromCandelBuilder::ordersFromCandel(currentCandle, ticker);
+		auto orders = OrdersFromCandleBuilder::ordersFromCandle(currentCandle, ticker);
 		for (Order order : orders) {
 			auto changes = depths[ticker].addOrder(order);
 			addToChangesToSend(changes);
@@ -118,6 +128,22 @@ void SingleTraderMarket::updatePortfolio() {
 	}
 }
 
+void SingleTraderMarket::addToPerformance() {
+	for (auto ticker : tickers) {
+		performance[ticker].push_back(portfolio[ticker]);
+	}
+	performance["money"].push_back(portfolio["money"]);
+	float lv = 0;
+	for (auto ticker : tickers) {
+		lv = lv
+			+ portfolio["money"]
+			+ portfolio[ticker] * historyData[ticker][currentTick].close
+			- abs(portfolio[ticker]) //for slippage
+			- portfolio[ticker]*commissions[ticker];		
+	}
+	performance["lv"].push_back(lv);
+}
+
 void SingleTraderMarket::addAndCleanOrders() {
 	for (Order order : this->ordersToAdd) {
 		MarketDepth& desiderDepth = depths[order.ticker];
@@ -135,10 +161,10 @@ void SingleTraderMarket::sendAndCleanTickData() {
 
 void SingleTraderMarket::sendAndCleanCandles() {
 	for (auto ticker : tickers) {
-		if (candelsToSend[ticker].size() > 0) {
-			this->trader->recieveCandels(ticker, candelsToSend[ticker]);
+		if (candlesToSend[ticker].size() > 0) {
+			this->trader->recieveCandles(ticker, candlesToSend[ticker]);
 		}
-		candelsToSend[ticker].clear();
+		candlesToSend[ticker].clear();
 	}
 }
 
@@ -147,7 +173,7 @@ void SingleTraderMarket::requestCandles(std::string ticker, int length) {
 	// additional +1 for not including begin and including end
 	int begin = max(0, currentTick + 1 - length + 1);
 	int end = min(numberOfTics, currentTick + 1 + 1);
-	candelsToSend[ticker] = std::vector<Candel>(historyData[ticker].begin()+ begin,
+	candlesToSend[ticker] = std::vector<Candle>(historyData[ticker].begin()+ begin,
 											 historyData[ticker].begin() + end);
 }
 
@@ -161,6 +187,10 @@ const CandesVectorMap & SingleTraderMarket::getInternalHistoryCandles() {
 
 const std::unordered_map<std::string, int>& SingleTraderMarket::getPortfio() {
 	return this->portfolio;
+}
+
+const std::unordered_map<std::string, std::vector<float>>& SingleTraderMarket::getPerformance() {
+	return this->performance;
 }
 
 void SingleTraderMarket::setComission(std::string ticker, int comission) {

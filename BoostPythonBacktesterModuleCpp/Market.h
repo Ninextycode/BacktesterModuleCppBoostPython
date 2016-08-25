@@ -1,6 +1,6 @@
 #pragma once
 
-typedef std::unordered_map<std::string, std::vector<Candel>> CandesVectorMap;
+typedef std::unordered_map<std::string, std::vector<Candle>> CandesVectorMap;
 
 class DECLSPEC SingleTraderMarket {
 public:
@@ -19,11 +19,10 @@ public:
 
 	void requestCandles(std::string ticker, int length);
 
-
 	const CandesVectorMap & getInternalHistoryCandles();
 
 	const std::unordered_map<std::string, int>& getPortfio();
-
+	const std::unordered_map<std::string, std::vector<float>> & getPerformance();
 	void setComission(std::string ticker, int comission);
 
 	int numberOfTics = -1;
@@ -40,11 +39,14 @@ private:
 	void addToChangesToSend(std::vector<OrderChange>& changes);
 	void clearDepthFromHistoryOrders(std::string ticker);
 	void updatePortfolio();
+	void addToPerformance();
+	void preparePerformance();
 	std::vector<Order> ordersToAdd;
 	std::vector<OrderChange> changesToSend;
-	CandesVectorMap candelsToSend;
+	CandesVectorMap candlesToSend;
 	CandesVectorMap historyData;
 	std::unordered_map<std::string, int> portfolio;
+	std::unordered_map<std::string, std::vector<float>> performance;
 	Trader* trader;
 
 	std::vector<std::string> tickers;

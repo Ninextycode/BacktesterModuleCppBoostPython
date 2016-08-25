@@ -70,8 +70,8 @@ struct TraderWrap : Trader, wrapper<Trader> {
 	TraderWrap(string identifier):Trader(identifier){
 
 	}
-	void newCandelsAction(string ticker, vector<Candel> candels) override {
-		this->get_override("new_candels_action")(ticker, candels);
+	void newCandlesAction(string ticker, vector<Candle> candles) override {
+		this->get_override("new_candles_action")(ticker, candles);
 	}
 	void newTickAction(vector<OrderChange> matcher,
 					   unordered_map<string, AnonimousMaketDepth> depths) override {
@@ -86,11 +86,11 @@ BOOST_PYTHON_MODULE(backtester) {
 	//changes received by trader
 	to_python_converter <vector<OrderChange>, stdvector_to_python<OrderChange>>();
 
-	//candels received by trader
-	to_python_converter <vector<Candel>, stdvector_to_python<Candel>>();
+	//candles received by trader
+	to_python_converter <vector<Candle>, stdvector_to_python<Candle>>();
 
 	//all history data
-	to_python_converter <CandesVectorMap, unordered_map_to_python<string, vector<Candel>>>();
+	to_python_converter <CandesVectorMap, unordered_map_to_python<string, vector<Candle>>>();
 
 	//orders in trader of exact stock 
 	to_python_converter <unordered_map<int, int>,
@@ -111,6 +111,13 @@ BOOST_PYTHON_MODULE(backtester) {
 	to_python_converter< unordered_map<string, int>,
 		unordered_map_to_python<string, int>>();
 
+	//performance_vector
+	to_python_converter<vector<float>,
+		stdvector_to_python<float>>();
+	
+	//performance
+	to_python_converter< unordered_map<string, vector<float>>,
+		unordered_map_to_python<string, vector<float>>>();
 
 	//recieved changes
 	enum_<ChangeReason>("ChangeReason")
@@ -119,13 +126,13 @@ BOOST_PYTHON_MODULE(backtester) {
 		.value("Cancelled", ChangeReason::Cancelled)
 		.value("Unknown", ChangeReason::Unknown);
 
-	class_<Candel>("Candel")
-		.def_readwrite("open", &Candel::open)
-		.def_readwrite("high", &Candel::high)
-		.def_readwrite("low", &Candel::low)
-		.def_readwrite("close", &Candel::close)
-		.def_readwrite("volume", &Candel::volume)
-		.add_property("datetime", &Candel::getdatetime)
+	class_<Candle>("Candle")
+		.def_readwrite("open", &Candle::open)
+		.def_readwrite("high", &Candle::high)
+		.def_readwrite("low", &Candle::low)
+		.def_readwrite("close", &Candle::close)
+		.def_readwrite("volume", &Candle::volume)
+		.add_property("datetime", &Candle::getdatetime)
 		.def(self == self)
 		.def(self_ns::str(self_ns::self))
 		.def(self_ns::repr(self_ns::self));
@@ -182,16 +189,17 @@ BOOST_PYTHON_MODULE(backtester) {
 
 	class_<TraderWrap, boost::noncopyable>("Trader", init<string>(args("identifier")))
 		.def("tick_action", pure_virtual(&Trader::newTickAction))
-		.def("new_candels_action", pure_virtual(&Trader::newCandelsAction))
+		.def("new_candles_action", pure_virtual(&Trader::newCandlesAction))
 
 		.def("change_order", &Trader::changeOrder, args("oredr"))
 		.def("make_order", &Trader::makeOrder, args("oredr"))
 		.def("get_portfolio", &Trader::getPortfio, return_value_policy<copy_const_reference>())
-
+		.def("get_performance", &Trader::getPerformance, return_value_policy<copy_const_reference>())
 		.def("set_market", &Trader::setMarket, args("market"))
 		.def("create_limit_order", &Trader::createLimitOrder, args("ticker", "volume", "price"))
 		.def("create_market_order", &Trader::createMarketOrder, args("ticker", "volume"))
-		.def("request_candles", &Trader::requestCandels, args("tickrt", "length"))
+		.def("create_IoC_order", &Trader::createIoCOrder, args("ticker", "volume", "price"))
+		.def("request_candles", &Trader::requestCandles, args("tickrt", "length"))
 		.add_property("orders", make_getter(&Trader::orders, return_value_policy<return_by_value>()));
 
 }

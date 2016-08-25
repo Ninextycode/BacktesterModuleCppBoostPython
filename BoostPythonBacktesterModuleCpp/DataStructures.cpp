@@ -141,7 +141,7 @@ bool operator==(const AnonimousMarketDepthItem & rhs, const AnonimousMarketDepth
 	return rhs.price == lhs.price && rhs.volume == lhs.volume;
 }
 
-bool operator==(const Candel & rhs, const Candel & lhs) {
+bool operator==(const Candle & rhs, const Candle & lhs) {
 	return
 		rhs.open == lhs.open &&
 		rhs.high == lhs.high &&
@@ -151,17 +151,17 @@ bool operator==(const Candel & rhs, const Candel & lhs) {
 		rhs.datetime == lhs.datetime;
 }
 
-void Candel::setdatetime(std::string datetime) {
+void Candle::setdatetime(std::string datetime) {
 	this->datetime = boost::posix_time::time_from_string(datetime);
 }
 
-std::string Candel::getdatetime() {
+std::string Candle::getdatetime() {
 	std::stringstream str;
 	str << datetime;
 	return str.str();
 }
 
-std::ostream &  operator<<(std::ostream & outputStream, const Candel & c) {
+std::ostream &  operator<<(std::ostream & outputStream, const Candle & c) {
 	outputStream
 		<< "open = " << c.open
 		<< " high = " << c.high
