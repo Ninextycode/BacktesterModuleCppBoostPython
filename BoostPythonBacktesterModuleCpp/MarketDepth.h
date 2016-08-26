@@ -20,6 +20,8 @@ private:
 	void tryMatchSellOrder(Order& order);
 	void tryMatchOrderWithExactPriceOrders(Order& order,
 								int price);
+	void workAroundCheckedOrder(Order& order);
+
 
 	void addChangeIfItIsNotHistory(OrderChange change);
 

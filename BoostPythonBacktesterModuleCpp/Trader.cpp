@@ -16,6 +16,9 @@ void Trader::recieveTickData(std::vector<OrderChange> changes,
 		if (orders[change.ticker][change.worstPossiblePrice] == 0) {
 			orders[change.ticker].erase(change.worstPossiblePrice);
 		}
+		if (orders[change.ticker].size() == 0) {
+			orders.erase(change.ticker);
+		}
 	}
 	
 	this->newTickAction(changes, depth);

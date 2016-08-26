@@ -16,6 +16,11 @@ std::vector<OrderChange> MarketDepth::addOrder(Order order) {
 	addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderPlaced(order));
 
 	tryMatchOrder(order);
+	workAroundCheckedOrder(order);
+	return currentChanges;
+}
+
+void MarketDepth::workAroundCheckedOrder(Order & order) {
 	if (order.orderType != OrderType::IoC && order.volume != 0) {
 		auto it_whereOrdersWithSuchPrice = this->totalDepth.find(order.price);
 		if (it_whereOrdersWithSuchPrice == this->totalDepth.end()) {
@@ -30,9 +35,7 @@ std::vector<OrderChange> MarketDepth::addOrder(Order order) {
 	} else if (order.orderType == OrderType::IoC) {
 		currentChanges.push_back(OrderChange::ChangesOfOrderVanished(order, ChangeReason::Cancelled));
 	}
-	return currentChanges;
 }
-
 
 void MarketDepth::tryMatchOrder(Order& order) {
 	if (order.volume > 0) {
@@ -118,14 +121,7 @@ void MarketDepth::addChangeIfItIsNotHistory(OrderChange change) {
 std::vector<OrderChange>  MarketDepth::changeOrder(Order order) {
 	currentChanges.clear();
 	removeOrdersOfSuchTraderWithSuchPrice(order);
-	if (order.volume != 0) {
-		auto it_whereOrdersWithSuchPrice = this->totalDepth.find(order.price);
-		if (it_whereOrdersWithSuchPrice == this->totalDepth.end()) {
-			(this->totalDepth)[order.price] = { order };
-		} else {
-			it_whereOrdersWithSuchPrice->second.push_front(order);
-		}
-	}
+	workAroundCheckedOrder(order);
 	return currentChanges;
 }
 
@@ -135,11 +131,8 @@ void MarketDepth::removeOrdersOfSuchTraderWithSuchPrice(Order newOrder) {
 		std::list<Order>& orderList = it_whereOrdersWithSuchPrice->second;
 		for (auto it = orderList.begin(); it != orderList.end(); ) {
 			if (it->traderIdentifier == newOrder.traderIdentifier) {
-
 				addChangeIfItIsNotHistory(OrderChange::ChangesOfOrderVanished(*it, ChangeReason::Cancelled));
-
 				it = orderList.erase(it);
-
 			} else {
 				it++;
 			}

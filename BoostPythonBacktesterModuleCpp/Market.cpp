@@ -88,13 +88,12 @@ void SingleTraderMarket::addOrder(Order order) {
 }
 
 void SingleTraderMarket::changeOrder(Order order) {
-	auto changes = depths[order.ticker].changeOrder(order);
-	addToChangesToSend(changes);
+	ordersToChange.push_back(order);
 }
 
 void SingleTraderMarket::tick() {
 	this->updateDepths();
-	this->addAndCleanOrders();
+	this->addChangeAndCleanOrders();
 	this->updatePortfolio();
 	this->addToPerformance();
 	this->sendAndCleanTickData();
@@ -144,14 +143,25 @@ void SingleTraderMarket::addToPerformance() {
 	performance["lv"].push_back(lv);
 }
 
-void SingleTraderMarket::addAndCleanOrders() {
+void SingleTraderMarket::addChangeAndCleanOrders() {
+	addAndCleanOrders();
+	changeAndCleanOrders();	
+}
+
+void  SingleTraderMarket::addAndCleanOrders() {
 	for (Order order : this->ordersToAdd) {
-		MarketDepth& desiderDepth = depths[order.ticker];
-		
-		auto changes = desiderDepth.addOrder(order);	
+		auto changes = depths[order.ticker].addOrder(order);
 		addToChangesToSend(changes);
 	}
 	ordersToAdd.clear();
+}
+
+void  SingleTraderMarket::changeAndCleanOrders() {
+	for (Order order : this->ordersToChange) {
+			auto changes = depths[order.ticker].changeOrder(order);
+			addToChangesToSend(changes);
+		}
+	ordersToChange.clear();
 }
 
 void SingleTraderMarket::sendAndCleanTickData() {

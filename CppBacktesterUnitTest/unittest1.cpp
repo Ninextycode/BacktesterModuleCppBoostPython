@@ -13,8 +13,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace std;
 namespace Microsoft {
 	namespace  VisualStudio {
-		namespace CppUnitTestFramework {
-			
+		namespace CppUnitTestFramework {			
 			template<> static wstring ToString<unordered_map<string, int>>
 				(const unordered_map<string, int>& d) {
 				stringstream message;
@@ -96,6 +95,23 @@ namespace Microsoft {
 				message << "vector of OrderChange\n";
 				for (auto it = d.begin(); it != d.end(); it++) {
 					message << *it << "\n";
+				}
+				auto s = message.str();
+				auto w_message = wstring(s.begin(), s.end());
+
+				return w_message;
+			}
+		
+			template<> static wstring ToString <unordered_map<string, unordered_map<int, int>>>
+				(const unordered_map<string, unordered_map<int, int>>& orders) {
+				stringstream message;
+				message << "vector of OrderChange\n"; 
+				for (auto it = orders.begin(); it != orders.end(); it++) {
+					auto orders_ticker = it->second;
+					message << it->first << "\n";
+					for (auto it2 = orders_ticker.begin(); it2 != orders_ticker.end(); it2++) {
+						message << "\t"<< it2->first << ": " << it2->second << "\n";
+					}
 				}
 				auto s = message.str();
 				auto w_message = wstring(s.begin(), s.end());
@@ -745,6 +761,57 @@ namespace CppBacktesterUnitTest {
 
 			Assert::AreEqual(expectedDepth, actuaDepth);
 			Assert::AreEqual(expectedChanges, actualChanges);
+		}
+
+		TEST_METHOD(CancellingOrders) {
+			string tofile = "datetime,close,high,low,open,volume\n";
+			tofile += "1998-08-04 10:00:00,1,2,3,100,50\n"; //0
+			tofile += "1998-08-05 10:00:00,1,2,3,100,50\n";
+			tofile += "1998-08-06 10:00:00,1,2,3,100,50\n";
+			tofile += "1998-08-07 10:00:00,1,2,3,100,50\n";
+			tofile += "1998-08-08 10:00:00,1,2,3,100,50\n";
+			tofile += "1998-08-09 10:00:00,1,2,3,100,50\n"; //5
+			tofile += "1998-08-10 10:00:00,1,2,3,100,50\n"; //6
+			tofile += "1998-08-11 10:00:00,1,2,3,100,50\n";
+			tofile += "1998-08-12 10:00:00,1,2,3,100,50\n";
+			tofile += "1998-08-13 10:00:00,1,2,3,100,50\n"; //9
+			ofstream out("share.csv");
+			if (out.is_open()) {
+				out << tofile;
+				out.close();
+			}
+
+			class TraderDepthSaver : public  Trader {
+			public:
+				TraderDepthSaver(string identifier) :Trader(identifier) {};
+				~TraderDepthSaver() {};
+				int tick = 0;
+				void newTickAction(std::vector<OrderChange> matches,
+								   std::unordered_map<std::string, AnonimousMaketDepth> depth) {
+					if (tick == 0) {
+						this->changeOrder(this->createLimitOrder("share", 10, 90));
+						this->changeOrder(this->createLimitOrder("share", -10, 110));
+					}
+					if (tick == 1) {
+						this->changeOrder(this->createLimitOrder("share", 0, 90));
+						this->changeOrder(this->createLimitOrder("share", 0, 110));
+					}
+					tick++;
+				}
+				void newCandlesAction(std::string ticker, std::vector<Candle> candles) {}
+				AnonimousMaketDepth depth5;
+			};
+
+			SingleTraderMarket* market = new SingleTraderMarket();
+			market->loadHistoryData("", { "share" });
+			TraderDepthSaver* trader = new TraderDepthSaver("Max");
+			market->setTrader(trader);
+			trader->setMarket(market);
+			market->runFullTest();
+
+			auto actualOrders = trader->orders;
+			unordered_map<string, unordered_map<int, int>> expectedOrders; //is empty
+			Assert::AreEqual(expectedOrders, actualOrders);
 		}
 
 	private:

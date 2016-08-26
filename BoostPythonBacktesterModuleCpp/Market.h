@@ -34,14 +34,18 @@ private:
 	void tick();
 	void updateDepths();
 	void sendAndCleanTickData();
-	void addAndCleanOrders();
+	void addChangeAndCleanOrders();
 	void sendAndCleanCandles();
 	void addToChangesToSend(std::vector<OrderChange>& changes);
 	void clearDepthFromHistoryOrders(std::string ticker);
 	void updatePortfolio();
 	void addToPerformance();
 	void preparePerformance();
+	void changeAndCleanOrders();
+	void addAndCleanOrders();
+
 	std::vector<Order> ordersToAdd;
+	std::vector<Order> ordersToChange;
 	std::vector<OrderChange> changesToSend;
 	CandesVectorMap candlesToSend;
 	CandesVectorMap historyData;
