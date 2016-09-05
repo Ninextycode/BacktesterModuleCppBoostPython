@@ -219,7 +219,7 @@ public:
 	c.low = 3;
 	c.close = 10;
 	c.volume = 5;
-	c.datetime = boost::posix_time::time_from_string("1998-08-07 10:00:00");
+	c.datetime_index = 0boost::posix_time::time_from_string("1998-08-07 10:00:00");
 
 	vector<Order> actual = OrdersFromCandleBuilder::ordersFromCandle(c, "share", 10, 2);
 
@@ -400,11 +400,11 @@ public:
 		c.volume = 5;
 
 		CandesVectorMap expected = {};
-		c.datetime = boost::posix_time::time_from_string("1998-08-04 10:00:00");
+		c.datetime_index = 0;
 		expected["share"].push_back(c);
-		c.datetime = boost::posix_time::time_from_string("1998-08-05 10:00:00");
+		c.datetime_index = 0;
 		expected["share"].push_back(c);
-		c.datetime = boost::posix_time::time_from_string("1998-08-06 10:00:00");
+		c.datetime_index = 0;
 		expected["share"].push_back(c);
 		Assert::AreEqual(expected, actual);
 	}
@@ -462,13 +462,13 @@ public:
 		c.volume = 50;
 
 		CandesVectorMap expected = {};
-		c.datetime = boost::posix_time::time_from_string("1998-08-07 10:00:00");
+		c.datetime_index = 0;
 		expected["share"].push_back(c);
-		c.datetime = boost::posix_time::time_from_string("1998-08-08 10:00:00");
+		c.datetime_index = 0;
 		expected["share"].push_back(c);
-		c.datetime = boost::posix_time::time_from_string("1998-08-09 10:00:00");
+		c.datetime_index = 0;
 		expected["share"].push_back(c);
-		c.datetime = boost::posix_time::time_from_string("1998-08-10 10:00:00");
+		c.datetime_index = 0;
 		expected["share"].push_back(c);
 
 		auto actual = trader->recieved;

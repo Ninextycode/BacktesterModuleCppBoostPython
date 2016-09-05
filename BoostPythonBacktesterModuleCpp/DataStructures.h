@@ -10,7 +10,7 @@ struct DECLSPEC Candle {
 	int low;
 	int close;
 	int volume = 0;
-	boost::posix_time::ptime datetime;
+	long datetime_index;
 
 	void setdatetime(std::string datetime);
 	std::string getdatetime();

@@ -148,16 +148,13 @@ bool operator==(const Candle & rhs, const Candle & lhs) {
 		rhs.low == lhs.low &&
 		rhs.close == lhs.close &&
 		rhs.volume == lhs.volume &&
-		rhs.datetime == lhs.datetime;
+		rhs.datetime_index == lhs.datetime_index;
 }
 
-void Candle::setdatetime(std::string datetime) {
-	this->datetime = boost::posix_time::time_from_string(datetime);
-}
 
 std::string Candle::getdatetime() {
 	std::stringstream str;
-	str << datetime;
+	str << datetime_index;
 	return str.str();
 }
 
@@ -168,7 +165,7 @@ std::ostream &  operator<<(std::ostream & outputStream, const Candle & c) {
 		<< " low = " << c.low
 		<< " close = " << c.close
 		<< " volume = " << c.volume
-		<< " datetime = " << c.datetime;
+		<< " datetime_index = " << c.datetime_index;
 	return outputStream;
 }
 

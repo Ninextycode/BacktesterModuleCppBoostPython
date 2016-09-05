@@ -31,6 +31,7 @@ void SingleTraderMarket::readFile(std::string path, std::string ticker) {
 	}
 	std::string s;
 	std::getline(input, s);
+	int i = 0;
 	while (!input.eof()) {		
 		std::getline(input, s);
 
@@ -57,7 +58,7 @@ void SingleTraderMarket::readFile(std::string path, std::string ticker) {
 		c.low = stoi(low);
 		c.close = stoi(close);
 		c.volume = volume.size() == 0 ? 0 : stoi(volume);
-		c.datetime = boost::posix_time::time_from_string(datetime);
+		c.datetime_index = i; //TODO FIX THIS datetime_index should br better
 		historyData[ticker].push_back(c);
 	}
 	if (numberOfTics == -1) {
