@@ -152,11 +152,6 @@ bool operator==(const Candle & rhs, const Candle & lhs) {
 }
 
 
-std::string Candle::getdatetime() {
-	std::stringstream str;
-	str << datetime_index;
-	return str.str();
-}
 
 std::ostream &  operator<<(std::ostream & outputStream, const Candle & c) {
 	outputStream

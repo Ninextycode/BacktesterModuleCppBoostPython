@@ -132,7 +132,7 @@ BOOST_PYTHON_MODULE(backtester) {
 		.def_readwrite("low", &Candle::low)
 		.def_readwrite("close", &Candle::close)
 		.def_readwrite("volume", &Candle::volume)
-		.add_property("datetime", &Candle::getdatetime)
+		.add_property("datetime_index", &Candle::datetime_index)
 		.def(self == self)
 		.def(self_ns::str(self_ns::self))
 		.def(self_ns::repr(self_ns::self));

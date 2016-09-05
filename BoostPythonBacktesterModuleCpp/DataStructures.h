@@ -12,8 +12,6 @@ struct DECLSPEC Candle {
 	int volume = 0;
 	long datetime_index;
 
-	void setdatetime(std::string datetime);
-	std::string getdatetime();
 	friend DECLSPEC bool operator==(const Candle& rhs,
 									const Candle& lhs);
 	friend DECLSPEC std::ostream& operator<<(std::ostream& outputStream,
