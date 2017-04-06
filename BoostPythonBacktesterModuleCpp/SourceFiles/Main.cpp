@@ -1,6 +1,6 @@
 #include <boost/python.hpp>
 
-#include "../Header Files/Backtester.h"
+#include "../HeaderFiles/Backtester.h"
 
 using namespace boost::python;
 using namespace std;

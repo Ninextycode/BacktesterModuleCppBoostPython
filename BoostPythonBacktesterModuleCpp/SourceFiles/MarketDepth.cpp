@@ -1,4 +1,4 @@
-#include "../Header Files/Backtester.h"
+#include "../HeaderFiles/Backtester.h"
 
 
 MarketDepth::MarketDepth(std::string ticker) {
@@ -148,7 +148,7 @@ AnonimousMaketDepthVector  MarketDepth::getAnonimousDepth(int depthLength) {
 	for (firstSell = 0; firstSell < prices.size()  &&  totalDepth[prices[firstSell]].begin()->volume > 0;
 		 firstSell++);
 
-	for (int i = max(0, firstSell - depthLength); i < firstSell &&  i < prices.size(); i++) {
+	for (int i = Max(0, firstSell - depthLength); i < firstSell &&  i < prices.size(); i++) {
 		AnonimousMarketDepthItem item;
 		item.volume = 0;
 		for (Order o : totalDepth[prices[i]]) {

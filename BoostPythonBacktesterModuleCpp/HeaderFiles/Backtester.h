@@ -7,7 +7,7 @@
 #include <ostream>
 #include <algorithm>
 #include <fstream>
-
+#include <limits.h>
 #include "DataStructures.h"
 #include "MarketDepth.h"
 
@@ -16,5 +16,5 @@
 
 #include "OrdersFromCandelBuilder.h"
 
-#define max(a, b) ((a > b) ? a : b)
-#define min(a, b) ((a < b) ? a : b)
+#define Max(a, b) ((a > b) ? a : b)
+#define Min(a, b) ((a < b) ? a : b)

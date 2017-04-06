@@ -1,4 +1,4 @@
-#include "../Header Files/Backtester.h"
+#include "../HeaderFiles/Backtester.h"
 
 
 SingleTraderMarket::SingleTraderMarket() {
@@ -63,7 +63,7 @@ void SingleTraderMarket::readFile(std::string path, std::string ticker) {
 	if (numberOfTics == -1) {
 		numberOfTics = historyData[ticker].size();
 	} else {
-		numberOfTics = min(historyData[ticker].size(), numberOfTics);
+		numberOfTics = Min(historyData[ticker].size(), numberOfTics);
 	}
 	input.close();
 }
@@ -181,8 +181,8 @@ void SingleTraderMarket::sendAndCleanCandles() {
 
 void SingleTraderMarket::requestCandles(std::string ticker, int length) {
 	// additional +1 for not including begin and including end
-	int begin = max(0, currentTick + 1 - length + 1);
-	int end = min(numberOfTics, currentTick + 1 + 1);
+	int begin = Max(0, currentTick + 1 - length + 1);
+	int end = Min(numberOfTics, currentTick + 1 + 1);
 	candlesToSend[ticker] = std::vector<Candle>(historyData[ticker].begin()+ begin,
 											 historyData[ticker].begin() + end);
 }

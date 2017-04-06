@@ -290,5 +290,12 @@ __pycache__/
 *.xsd.cs
 
 
+#linux build folder
+objects/
+
+#unit tests
+tests
+
 # include build libraries
 !**/backtester.pyd
+!**/backtester.so

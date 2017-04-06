@@ -1,4 +1,4 @@
-#include "../Header Files/Backtester.h"
+#include "../HeaderFiles/Backtester.h"
 
 
 Trader::Trader(std::string identifier) {

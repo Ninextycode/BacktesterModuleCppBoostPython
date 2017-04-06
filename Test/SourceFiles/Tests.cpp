@@ -1,5 +1,5 @@
-#include "../../BoostPythonBacktesterModuleCpp/Header Files/Backtester.h"
-#include<stdio.h>     //for remove( )
+#include "../../BoostPythonBacktesterModuleCpp/HeaderFiles/Backtester.h"
+#include <stdio.h>     //for remove( )
 
 #include <iostream>
 #include <fstream>
